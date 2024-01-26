@@ -1,7 +1,8 @@
-import { Box, Button, ImageList, ImageListItem, Input, Table, TextField } from '@mui/material';
+import { Box, Button, ImageList, ImageListItem, Input, Table, TextField, Typography } from '@mui/material';
 import react, { useEffect, useState } from 'react';
 import { addProduct, getCompanyProducts, getProductQRcodes, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
+import QRCode from '../components/displayQRCode';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -18,7 +19,7 @@ const Page = () => {
     const [productFiles, setProductFiles] = useState([]);
     const [productVideos, setProductVideos] = useState([]);
     const [updates, setUpdates] = useState(0);
-    console.log(products);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     const loginHanlder = async () => {
         const res = await login({name, password});
@@ -88,10 +89,12 @@ const Page = () => {
 
     const productSelectHandler = (data) => {
         setSelectedProduct(data);
+        setTotalAmount(data.total_minted_amount)
     }
     
     const batchMintHandler = async () => {
-        await productMint(selectedProduct._id,  parseInt(mintAmount, 10));
+        const totalAmount = await productMint(selectedProduct._id,  parseInt(mintAmount, 10));
+        setTotalAmount(totalAmount);
         const res = await getProductQRcodes(selectedProduct._id);
         setQrCodes(res);
     }
@@ -154,6 +157,7 @@ const Page = () => {
         setProductVideos(temp);
         setUpdates(updates + 1);
     }
+
     return (
         <Box sx={{ p: 5 }}>
             {!company
@@ -161,16 +165,18 @@ const Page = () => {
                         <br/><br/>
                         <TextField id="outlined-basic" label="name" variant="outlined" size='small' value={name} onChange={(e) => setName(e.target.value)}/>
                         <br/><br/>
-                        <TextField id="outlined-basic" label="password" variant="outlined" size='small' value={password} onChange={(e) => setPassword(e.target.value)}/>
+                        <TextField id="outlined-basic" type='password' label="password" variant="outlined" size='small' value={password} onChange={(e) => setPassword(e.target.value)}/>
                         <br/><br/>
                         <Button variant='outlined' onClick={loginHanlder}>Login</Button> &nbsp;
                         <Button variant='outlined' onClick={registerHandler}>Register</Button>
                 </Box>
                 : <>
                     <Box sx={{ pb: 2 }}>
-                        Company: {company.name}
+                        <Typography> Company Name: {company.name} </Typography>
+                        <Typography> Company Wallet: {company.wallet} </Typography>
+                        <QRCode data={company.qrcode} />
                     </Box>
-                    <Box sx={{ pb: 2 }}>
+                    <Box sx={{ pb: 2, pt: 5 }}>
                         Products
                         <br/><br/>
                         <TextField id="outlined-basic" label="Brand Name" variant="outlined" size='small' value={productName} onChange={(e) => setProductName(e.target.value)} multiline/> &nbsp;
@@ -218,17 +224,11 @@ const Page = () => {
                         </Box>
                         <Box sx={{ pt: 2 }}>
                             Qr Codes for Selected Product <br/>
-                            Count: {selectedProduct.total_minted_amount}
+                            Count: {totalAmount}
+
                             <ImageList sx={{ width: 1200, height: 450 }} cols={5} rowHeight={230}>
                                 {qrcodes.map((item, i) => (
-                                    <ImageListItem key={i}>
-                                        <img
-                                            // srcSet={`${item.img}?w=161&fit=crop&auto=format&dpr=2 2x`}
-                                            src={`${item.image}`}
-                                            // alt={item.title}
-                                            loading="lazy"
-                                        />
-                                    </ImageListItem>
+                                    <QRCode data={item} />
                                 ))}
                             </ImageList>
                         </Box>

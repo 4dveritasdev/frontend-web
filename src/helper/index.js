@@ -58,11 +58,14 @@ export const getCompanyProducts = async (data) => {
 
 export const productMint =async (product_id, amount) => {
     try {
-        const pres = await axios.post(`${Backend_URL}product/${product_id}/mint`, { amount });
+        const res = await axios.post(`${Backend_URL}product/${product_id}/mint`, { amount });
         // console.log(pres);
         // const res = await axios.post(`${Backend_URL}qrcode/product`, { product_id, amount, offset: pres.data.offset });
         // console.log(res);
         // return res.data.data.data;
+        console.log(res);
+        return res.data.offset;
+        return res;
     } catch (err) {
         console.log(err);
     }
@@ -81,7 +84,7 @@ export const getQRcodes = async () => {
 export const getProductQRcodes = async (product_id) => {
     try {
         const res = await axios.post(`${Backend_URL}qrcode/product`, { product_id});
-        return res.data.data.data;
+        return res.data.data;
     } catch (err) {
         console.log(err);
         return [];
