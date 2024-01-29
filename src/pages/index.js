@@ -174,7 +174,11 @@ const Page = () => {
                     <Box sx={{ pb: 2 }}>
                         <Typography> Company Name: {company.name} </Typography>
                         <Typography> Company Wallet: {company.wallet} </Typography>
-                        <QRCode data={company.qrcode} />
+                        {/* <QRCode data={company.qrcode} /> */}
+                        <img
+                            src={`${company.qrcode}`}
+                            loading="lazy"
+                        />
                     </Box>
                     <Box sx={{ pb: 2, pt: 5 }}>
                         Products
