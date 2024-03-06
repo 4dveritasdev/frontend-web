@@ -3,6 +3,7 @@ import react, { useEffect, useState } from 'react';
 import { addProduct, getCompanyProducts, getProductQRcodes, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
+import io from 'socket.io-client';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -20,6 +21,24 @@ const Page = () => {
     const [productVideos, setProductVideos] = useState([]);
     const [updates, setUpdates] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
+    const [page, setPage] = useState(1);
+
+    // useEffect(() => {
+    //     console.log('socket');
+    //     const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
+        
+    //     socket.on('connect', () => {
+    //       console.log('Connected to server');
+    //     });
+    
+    //     socket.on('message', (data) => {
+    //       console.log('Received message:', data);
+    //     });
+    
+    //     return () => {
+    //       socket.disconnect();
+    //     };
+    // }, []);
 
     const loginHanlder = async () => {
         const res = await login({name, password});
@@ -95,18 +114,29 @@ const Page = () => {
     const batchMintHandler = async () => {
         const totalAmount = await productMint(selectedProduct._id,  parseInt(mintAmount, 10));
         setTotalAmount(totalAmount);
-        const res = await getProductQRcodes(selectedProduct._id);
+        const res = await getProductQRcodes(selectedProduct._id, 1);
         setQrCodes(res);
+        setPage(1);
     }
 
     useEffect(() => {
         if(selectedProduct) {
             (async () => {
-                const res = await getProductQRcodes(selectedProduct._id);
+                const res = await getProductQRcodes(selectedProduct._id, 1);
                 setQrCodes(res);
+                setPage(1);
             })()
         }
     }, [selectedProduct]);
+
+    useEffect(() => {
+        (async () => {
+            if(selectedProduct) {
+                const res = await getProductQRcodes(selectedProduct._id, page);
+                setQrCodes(res);
+            }
+        })()
+    }, [page]);
 
     const handleProductImageChange = async (event) => {
         event.stopPropagation();
@@ -228,13 +258,19 @@ const Page = () => {
                         </Box>
                         <Box sx={{ pt: 2 }}>
                             Qr Codes for Selected Product <br/>
-                            Count: {totalAmount}
-
-                            <ImageList sx={{ width: 1200, height: 450 }} cols={5} rowHeight={230}>
-                                {qrcodes.map((item, i) => (
-                                    <QRCode data={item} />
-                                ))}
-                            </ImageList>
+                            Count: {totalAmount} <br/>
+                            Page: &nbsp;
+                            <a style={{ cursor: 'pointer', color: 'blue', fontSize: 20}} onClick={() => {if(page > 1) setPage(page - 1)}}>  {'<'} </a> 
+                            &nbsp;{page}&nbsp;
+                            <a style={{ cursor: 'pointer', color: 'blue', fontSize: 20}} onClick={() => {if(page < Math.ceil(totalAmount / 100)) setPage(page + 1)}}>  {'>'} </a>
+                            <br/>
+                            Items: {(page - 1) * 100 + 1} - {page === Math.ceil(totalAmount / 100) && totalAmount % 100 ? totalAmount % 100 + (page - 1) * 100 : page * 100}
+                            <br/>
+                            <br/>
+                            
+                            {qrcodes.map((item, index) => (
+                                <QRCode key={index} data={item} />
+                            ))}
                         </Box>
                     </Box>}
                 </>
