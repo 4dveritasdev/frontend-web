@@ -1,6 +1,6 @@
 import { Box, Button, ImageList, ImageListItem, Input, Table, TextField, Typography } from '@mui/material';
 import react, { useEffect, useState } from 'react';
-import { addProduct, getCompanyProducts, getProductQRcodes, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
+import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
@@ -23,22 +23,42 @@ const Page = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [page, setPage] = useState(1);
 
-    // useEffect(() => {
-    //     console.log('socket');
-    //     const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
+    useEffect(() => {
+        console.log('socket');
+        const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
+        // const socket = io('http://localhost:5050/'); // Replace with your server address
         
-    //     socket.on('connect', () => {
-    //       console.log('Connected to server');
-    //     });
+        socket.on('connect', () => {
+          console.log('Connected to server');
+        });
     
-    //     socket.on('message', (data) => {
-    //       console.log('Received message:', data);
-    //     });
+        // socket.on('message', (data) => {
+        //   console.log('Received message:', data);
+        // });
+
+        socket.on('Refresh product data', async () => {
+            console.log('refresh', selectedProduct);
+            if (selectedProduct) {
+                
+                const comProducts = await getCompanyProducts({ company_id: company._id });
+                const ptmp = comProducts.map((p, i) => ({
+                    id: i + 1,
+                    ...p
+                }));
+                setProducts(ptmp);
+
+                const selectedProductData = await getSelectedProductData(selectedProduct._id);
+                setTotalAmount(selectedProductData.total_minted_amount);
+                const res = await getProductQRcodes(selectedProduct._id, 1);
+                setQrCodes(res);
+                setPage(1);
+            }
+        });
     
-    //     return () => {
-    //       socket.disconnect();
-    //     };
-    // }, []);
+        return () => {
+          socket.disconnect();
+        };
+    }, [selectedProduct]);
 
     const loginHanlder = async () => {
         const res = await login({name, password});
@@ -259,13 +279,15 @@ const Page = () => {
                         <Box sx={{ pt: 2 }}>
                             Qr Codes for Selected Product <br/>
                             Count: {totalAmount} <br/>
-                            Page: &nbsp;
-                            <a style={{ cursor: 'pointer', color: 'blue', fontSize: 20}} onClick={() => {if(page > 1) setPage(page - 1)}}>  {'<'} </a> 
-                            &nbsp;{page}&nbsp;
-                            <a style={{ cursor: 'pointer', color: 'blue', fontSize: 20}} onClick={() => {if(page < Math.ceil(totalAmount / 100)) setPage(page + 1)}}>  {'>'} </a>
-                            <br/>
-                            Items: {(page - 1) * 100 + 1} - {page === Math.ceil(totalAmount / 100) && totalAmount % 100 ? totalAmount % 100 + (page - 1) * 100 : page * 100}
-                            <br/>
+                            {totalAmount > 0 && <>
+                                Page: &nbsp;
+                                <a style={{ cursor: 'pointer', color: 'blue', fontSize: 16}} onClick={() => {if(page > 1) setPage(page - 1)}}>  {'<- Prev '} </a> 
+                                &nbsp;&nbsp;{page}&nbsp;&nbsp;
+                                <a style={{ cursor: 'pointer', color: 'blue', fontSize: 16}} onClick={() => {if(page < Math.ceil(totalAmount / 100)) setPage(page + 1)}}>  {'Next ->'} </a>
+                                <br/>
+                                Items: {(page - 1) * 100 + 1} - {page === Math.ceil(totalAmount / 100) && totalAmount % 100 ? totalAmount % 100 + (page - 1) * 100 : page * 100}
+                                <br/>
+                            </>}
                             <br/>
                             
                             {qrcodes.map((item, index) => (

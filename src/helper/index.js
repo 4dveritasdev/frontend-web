@@ -81,6 +81,16 @@ export const getQRcodes = async () => {
     }
 }
 
+export const getSelectedProductData = async (id) => {
+    try {
+        const res = await axios.get(`${Backend_URL}product/${id}`);
+        console.log(res);
+        return res.data.data.doc;
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 export const getProductQRcodes = async (product_id, page) => {
     try {
         const res = await axios.post(`${Backend_URL}qrcode/product`, { product_id, page });
