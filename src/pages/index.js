@@ -17,7 +17,9 @@ const Page = () => {
     const [mintAmount, setMintAmout] = useState(0);
     const [qrcodes, setQrCodes] = useState([]);
     const [productImages, setProductImages] = useState([]);
+    const [productImageInputs, setProductImageInputs] = useState([]);
     const [productFiles, setProductFiles] = useState([]);
+    const [productFileInputs, setProductFileInputs] = useState([]);
     const [productVideos, setProductVideos] = useState([]);
     const [updates, setUpdates] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -89,6 +91,8 @@ const Page = () => {
         setProductImages([]);
         setProductFiles([]);
         setProductVideos([]);
+        setProductImageInputs([]);
+        setProductFileInputs([]);
         setUpdates(0);
     }
 
@@ -158,7 +162,7 @@ const Page = () => {
         })()
     }, [page]);
 
-    const handleProductImageChange = async (event) => {
+    const handleProductImageChange = async (event, i) => {
         event.stopPropagation();
         if (event.target.files && event.target.files.length) {
         //   const file = event.target.files[0];
@@ -171,11 +175,25 @@ const Page = () => {
                 body.append("files", single_file);
             }
             const res = await uploadFiles(body);
-            setProductImages(res);
+
+            let temp = productImageInputs;
+            temp[i] = res;
+            setProductImageInputs(temp);
+
+            let images = [];
+            for (let inputs of temp) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+            setProductImages(images);
+
+            // setProductImages(res);
         }
     };
+    console.log(productImages);
 
-    const handleProductFilesChange = async (event) => {
+    const handleProductFilesChange = async (event, i) => {
         event.stopPropagation();
         if (event.target.files && event.target.files.length) {
           
@@ -184,7 +202,18 @@ const Page = () => {
                 body.append("files", single_file);
             }
             const res = await uploadFiles(body);
-            setProductFiles(res);
+            
+            let temp = productFileInputs;
+            temp[i] = res;
+            setProductFileInputs(temp);
+
+            let files = [];
+            for (let inputs of temp) {
+                for (let file of inputs) {
+                    files.push(file);
+                }
+            }
+            setProductFiles(files);
         }
     };
 
@@ -192,6 +221,20 @@ const Page = () => {
         let temp = productVideos;
         temp.push({url: '', description: ''});
         setProductVideos(temp);
+        setUpdates(updates + 1);
+    }
+    
+    const handleProductImageAddClick = () => {
+        let temp = productImageInputs;
+        temp.push([]);
+        setProductImageInputs(temp);
+        setUpdates(updates + 1);
+    }
+    
+    const handleProductFileAddClick = () => {
+        let temp = productFileInputs;
+        temp.push([]);
+        setProductFileInputs(temp);
         setUpdates(updates + 1);
     }
 
@@ -239,15 +282,30 @@ const Page = () => {
                         <br/><br/>
                         <TextField id="outlined-basic" label="Details" variant="outlined" size='small' value={productDetail} onChange={(e) => setProductDetail(e.target.value)} multiline/> &nbsp;
                         <br/><br/>
-                        Images: <input type='file' onChange={handleProductImageChange} multiple/>
+                        Images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
                         <br/><br/>
-                        Files: <input type='file' onChange={handleProductFilesChange} multiple/>
+                        {productImageInputs.map((images, i) => (
+                            <>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple/>
+                                <br/><br/>
+                            </>
+                        ))}
+
+                        {/* <input type='file' onChange={handleProductImageChange} multiple/> */}
+                        Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
                         <br/><br/>
+                        {/* <input type='file' onChange={handleProductFilesChange} multiple/> */}
+                        {productFileInputs.map((files, i) => (
+                            <>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
+                                <br/><br/>
+                            </>
+                        ))}
                         Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
                         <br/><br/>
                         {productVideos.map((video, i) => (
                             <>
-                                <TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
                                 <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleProductVideoDescriptionChange(e, i)} /> &nbsp;
                                 <br/><br/>
                             </>
