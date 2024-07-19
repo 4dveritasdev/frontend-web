@@ -4,6 +4,8 @@ import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductDa
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
+import PrintModal from '../components/printModal';
+import CircularProgressWithLabel from '../components/CircularProgressBar';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -25,10 +27,14 @@ const Page = () => {
     const [totalAmount, setTotalAmount] = useState(0);
     const [page, setPage] = useState(1);
 
+    const [isMinting, setIsMinting] = useState(false);
+    const [startAmount, setStartAmount] = useState(0);
+    const [mintingProgress, setMintingProgress] = useState(0);
+
     useEffect(() => {
         console.log('socket');
-        const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
-        // const socket = io('http://localhost:5050/'); // Replace with your server address
+        // const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
+        const socket = io('http://localhost:5050/'); // Replace with your server address
         
         socket.on('connect', () => {
           console.log('Connected to server');
@@ -61,6 +67,12 @@ const Page = () => {
           socket.disconnect();
         };
     }, [selectedProduct]);
+
+    useEffect(() => {
+        if(isMinting) {
+            setMintingProgress(Math.ceil((totalAmount - startAmount) * 100 / mintAmount));
+        }
+    }, [totalAmount]);
 
     const loginHanlder = async () => {
         const res = await login({name, password});
@@ -136,11 +148,17 @@ const Page = () => {
     }
     
     const batchMintHandler = async () => {
-        const totalAmount = await productMint(selectedProduct._id,  parseInt(mintAmount, 10));
-        setTotalAmount(totalAmount);
+        setIsMinting(true);
+        setStartAmount(totalAmount);
+        setMintingProgress(0);
+
+        const totalAmount1 = await productMint(selectedProduct._id,  parseInt(mintAmount, 10));
+        setTotalAmount(totalAmount1);
         const res = await getProductQRcodes(selectedProduct._id, 1);
         setQrCodes(res);
         setPage(1);
+
+        setIsMinting(false);
     }
 
     useEffect(() => {
@@ -251,6 +269,8 @@ const Page = () => {
         setUpdates(updates + 1);
     }
 
+    const [openPrintModal, setOpenPrintModal] = useState(false);
+
     return (
         <Box sx={{ p: 5 }}>
             {!company
@@ -331,8 +351,13 @@ const Page = () => {
                         <Box>
                             Mint
                             <br/><br/>
-                            <TextField id="outlined-basic" label="amount" variant="outlined" size='small' value={mintAmount} onChange={(e) => setMintAmout(e.target.value)}/> &nbsp;
-                            <Button variant='outlined' onClick={batchMintHandler}>Mint</Button>
+                            <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                                <TextField type='number' label="amount" variant="outlined" size='small' value={mintAmount} onChange={(e) => setMintAmout(e.target.value)}/> &nbsp;
+                                &nbsp;
+                                <Button variant='outlined' onClick={batchMintHandler}>Mint</Button>
+                                &nbsp;
+                                {isMinting && <CircularProgressWithLabel value={mintingProgress}/>}
+                            </Box>
                         </Box>
                         <Box sx={{ pt: 2 }}>
                             Qr Codes for Selected Product <br/>
@@ -347,6 +372,11 @@ const Page = () => {
                                 <br/>
                             </>}
                             <br/>
+
+                            <Button variant="outlined" onClick={() => setOpenPrintModal(true)}>
+                                Print
+                            </Button>
+                            <br/>
                             
                             {qrcodes.map((item, index) => (
                                 <QRCode key={index} data={item} />
@@ -355,6 +385,7 @@ const Page = () => {
                     </Box>}
                 </>
             }
+            {selectedProduct && <PrintModal open={openPrintModal} setOpen={setOpenPrintModal} totalAmount={totalAmount} product={selectedProduct} setProduct={setSelectedProduct}/>}
         </Box>
     );
 }
