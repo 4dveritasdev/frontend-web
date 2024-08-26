@@ -29,6 +29,7 @@ export default function PrintModal({open, setOpen, totalAmount, product, setProd
     const [from, setFrom] = React.useState(0);
     const [to, setTo] = React.useState(0);
     const [printMode, setPrintMode] = React.useState('print');
+    const [apply, setApply] = React.useState(false);
 
     const [count, setCount] = React.useState(0);
 
@@ -124,10 +125,10 @@ export default function PrintModal({open, setOpen, totalAmount, product, setProd
                     
 
                     <br/>
-                    {/* <Button variant='contained' color='primary'>Apply</Button>
-                    <br/> */}
+                        <Button variant='contained' color='primary' onClick={() => { setApply(!apply) }}>Apply</Button>
                     <br/>
-                    <PDFDownloadLink document={<MyDocument product={product} printMode={printMode} count={count} from={from} to={to}/>} 
+                    <br/>
+                    <PDFDownloadLink document={<MyDocument product={product} apply={apply} printMode={printMode} count={count} from={from} to={to} />} 
                         onClick={downloadPDFHandler} fileName={`${product.name}-${printMode}-${printMode === 'print' ? product.printed_amount + 1 : from}-${printMode === 'print' ? product.printed_amount + Number(count) : to}.pdf`}>
                         {({ blob, url, loading, error }) => <Button variant='contained' color='primary'>{loading ? 'In Progress...' : 'Download PDF'}</Button>}
                     </PDFDownloadLink>

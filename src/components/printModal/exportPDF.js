@@ -35,7 +35,7 @@ const QRCode = ({data}) => {
 }
 
 // Create Document Component
-const MyDocument = ({ product, printMode, count, from, to }) => {
+const MyDocument = ({ product, apply, printMode, count, from, to }) => {
     const [qrcodes, setQrCodes] = useState([]);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const MyDocument = ({ product, printMode, count, from, to }) => {
             const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
             setQrCodes(res);
         })()
-    }, [printMode, count, from, to]);
+    }, [apply]);
     console.log(qrcodes);
 
     return (
