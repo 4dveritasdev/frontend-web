@@ -72,7 +72,7 @@ export const productMint =async (product_id, amount) => {
         // const res = await axios.post(`${Backend_URL}qrcode/product`, { product_id, amount, offset: pres.data.offset });
         // console.log(res);
         // return res.data.data.data;
-        console.log(res);
+        // console.log(res);
         return res.data.offset;
         return res;
     } catch (err) {
@@ -83,7 +83,7 @@ export const productMint =async (product_id, amount) => {
 export const getQRcodes = async () => {
     try {
         const res = await axios.get(`${Backend_URL}qrcode`);
-        console.log(res);
+        // console.log(res);
         return res.data.data.data;
     } catch (err) {
         console.log(err);
@@ -93,7 +93,7 @@ export const getQRcodes = async () => {
 export const getSelectedProductData = async (id) => {
     try {
         const res = await axios.get(`${Backend_URL}product/${id}`);
-        console.log(res);
+        // console.log(res);
         return res.data.data.doc;
     } catch (err) {
         console.log(err);

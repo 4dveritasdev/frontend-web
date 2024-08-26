@@ -36,9 +36,10 @@ export default function PrintModal({open, setOpen, totalAmount, product, setProd
     const downloadPDFHandler = async () => {
         if (printMode === 'print') {
             const productInfo = await printProductQRCodes(product._id, Number(count));
-            console.log(productInfo);
+            // console.log(productInfo);
             setProduct(productInfo);
         }
+        setApply(false);
     }
 
     React.useEffect(() => {
@@ -125,13 +126,15 @@ export default function PrintModal({open, setOpen, totalAmount, product, setProd
                     
 
                     <br/>
-                        <Button variant='contained' color='primary' onClick={() => { setApply(!apply) }}>Apply</Button>
-                    <br/>
-                    <br/>
-                    <PDFDownloadLink document={<MyDocument product={product} apply={apply} printMode={printMode} count={count} from={from} to={to} />} 
+                    {!apply && <Button variant='contained' color='primary' onClick={() => { setApply(true) }}>Apply</Button>}
+                    {/* <Button variant='contained' color='primary' onClick={() => { setApply(true) }}>Apply</Button> */}
+                    
+                    <PDFDownloadLink hidden={!apply} document={<MyDocument product={product} apply={apply} printMode={printMode} count={count} from={from} to={to} />} 
                         onClick={downloadPDFHandler} fileName={`${product.name}-${printMode}-${printMode === 'print' ? product.printed_amount + 1 : from}-${printMode === 'print' ? product.printed_amount + Number(count) : to}.pdf`}>
                         {({ blob, url, loading, error }) => <Button variant='contained' color='primary'>{loading ? 'In Progress...' : 'Download PDF'}</Button>}
                     </PDFDownloadLink>
+                    <br/>
+                    
                 </Grid>
                 {/* <Grid item xs={12} lg={6}>
                     <Typography sx={{ textDecoration: 'underline', fontSize: 18}}>

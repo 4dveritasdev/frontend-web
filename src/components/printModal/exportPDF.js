@@ -39,12 +39,15 @@ const MyDocument = ({ product, apply, printMode, count, from, to }) => {
     const [qrcodes, setQrCodes] = useState([]);
 
     useEffect(() => {
-        (async () => {
-            const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
-            setQrCodes(res);
-        })()
+        // console.log(apply);
+        if(apply) {
+            (async () => {
+                const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
+                setQrCodes(res);
+            })()
+        }
     }, [apply]);
-    console.log(qrcodes);
+    // console.log(qrcodes);
 
     return (
         <Document>
