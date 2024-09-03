@@ -1,11 +1,16 @@
-import { Box, Button, ImageList, ImageListItem, Input, Table, TextField, Typography } from '@mui/material';
-import react, { useEffect, useState } from 'react';
+import { Box, Button, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
 import PrintModal from '../components/printModal';
 import CircularProgressWithLabel from '../components/CircularProgressBar';
+import Tabs from '@mui/joy/Tabs';
+import TabList from '@mui/joy/TabList';
+import Tab from '@mui/joy/Tab';
+import TabPanel from '@mui/joy/TabPanel';
+import { NumericFormat } from 'react-number-format';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -22,6 +27,14 @@ const Page = () => {
     const [productImageInputs, setProductImageInputs] = useState([]);
     const [productFiles, setProductFiles] = useState([]);
     const [productFileInputs, setProductFileInputs] = useState([]);
+    const [warrantyPeriod, setWarrantyPeriod] = useState(0);
+    const [warrantyUnit, setWarrantyUnit] = useState(0);
+    const [guaranteePeriod, setGuaranteePeriod] = useState(0);
+    const [guaranteeUnit, setGuaranteeUnit] = useState(0);
+    const [manualsAndCerts, setManualsAndCerts] = useState({
+        public: '',
+        private: ''
+    });
     const [productVideos, setProductVideos] = useState([]);
     const [updates, setUpdates] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
@@ -89,7 +102,7 @@ const Page = () => {
             alert('please fill all fields and upload an image');
             return;
         }
-        await addProduct({name: productName, model: productModel, detail: productDetail, company_id: company._id, images:productImages, files: productFiles, videos: productVideos});
+        await addProduct({name: productName, model: productModel, detail: productDetail, company_id: company._id, images:productImages, files: productFiles, videos: productVideos, warrantyAndGuarantee: { warranty: {period: warrantyPeriod, unit: warrantyUnit}, guarantee: {period: guaranteePeriod, unit: guaranteeUnit}}, manualsAndCerts});
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
             id: i + 1,
@@ -105,6 +118,14 @@ const Page = () => {
         setProductVideos([]);
         setProductImageInputs([]);
         setProductFileInputs([]);
+        setWarrantyPeriod(0);
+        setWarrantyUnit(0);
+        setGuaranteePeriod(0);
+        setGuaranteeUnit(0);
+        setManualsAndCerts({
+            public: '',
+            private: ''
+        });
         setUpdates(0);
     }
 
@@ -302,34 +323,114 @@ const Page = () => {
                         <br/><br/>
                         <TextField id="outlined-basic" label="Details" variant="outlined" size='small' value={productDetail} onChange={(e) => setProductDetail(e.target.value)} multiline/> &nbsp;
                         <br/><br/>
-                        Images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
-                        <br/><br/>
-                        {productImageInputs.map((images, i) => (
-                            <>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple/>
-                                <br/><br/>
-                            </>
-                        ))}
 
-                        {/* <input type='file' onChange={handleProductImageChange} multiple/> */}
-                        Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
-                        <br/><br/>
-                        {/* <input type='file' onChange={handleProductFilesChange} multiple/> */}
-                        {productFileInputs.map((files, i) => (
-                            <>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
+                        <Tabs aria-label="Basic tabs" defaultValue={0}>
+                            <TabList>
+                                <Tab>DPP</Tab>
+                                <Tab>Warranty & Guaranty</Tab>
+                                <Tab>Manuals & Certs</Tab>
+                            </TabList>
+                            <TabPanel value={0}>
+                                Images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
                                 <br/><br/>
-                            </>
-                        ))}
-                        Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
-                        <br/><br/>
-                        {productVideos.map((video, i) => (
-                            <>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
-                                <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleProductVideoDescriptionChange(e, i)} /> &nbsp;
+                                {productImageInputs.map((images, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple/>
+                                        <br/><br/>
+                                    </>
+                                ))}
+
+                                {/* <input type='file' onChange={handleProductImageChange} multiple/> */}
+                                Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
                                 <br/><br/>
-                            </>
-                        ))}
+                                {/* <input type='file' onChange={handleProductFilesChange} multiple/> */}
+                                {productFileInputs.map((files, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
+                                        <br/><br/>
+                                    </>
+                                ))}
+                                Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
+                                <br/><br/>
+                                {productVideos.map((video, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
+                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleProductVideoDescriptionChange(e, i)} /> &nbsp;
+                                        <br/><br/>
+                                    </>
+                                ))}
+                            </TabPanel>
+                            <TabPanel value={1}>
+                                <>
+                                    Warranty: &nbsp;&nbsp;
+                                    <TextField 
+                                        type='number' 
+                                        variant="outlined" 
+                                        label="Period" 
+                                        size='small' 
+                                        sx={{ width: 80}}
+                                        value={warrantyPeriod} 
+                                        onChange={(e) => {setWarrantyPeriod(e.target.value)}} 
+                                    /> &nbsp;
+                                    <Select
+                                        value={warrantyUnit} 
+                                        onChange={(e) => {setWarrantyUnit(e.target.value)}} 
+                                        size='small'
+                                    >
+                                        <MenuItem value={0}>Week</MenuItem>
+                                        <MenuItem value={1}>Month</MenuItem>
+                                    </Select>
+                                    <br /><br />
+                                    Guarantee: &nbsp;&nbsp;
+                                    <TextField 
+                                        type='number' 
+                                        variant="outlined" 
+                                        label="Period" 
+                                        size='small' 
+                                        sx={{ width: 80}}
+                                        value={guaranteePeriod} 
+                                        onChange={(e) => {setGuaranteePeriod(e.target.value)}} 
+                                    /> &nbsp;
+                                    <Select
+                                        value={guaranteeUnit} 
+                                        onChange={(e) => {setGuaranteeUnit(e.target.value)}} 
+                                        size='small'
+                                    >
+                                        <MenuItem value={0}>Week</MenuItem>
+                                        <MenuItem value={1}>Month</MenuItem>
+                                    </Select>
+                                    <br/><br/>
+                                </>
+                            </TabPanel>
+                            <TabPanel value={2}>
+                                Public: <TextField 
+                                    placeholder=' - User manuals
+                                        - Assembly manuals
+                                        - Product certifications
+                                        - Health warnings
+                                        - Etc.'
+                                    sx={{ width: '80%' }} 
+                                    variant="outlined" 
+                                    multiline 
+                                    rows={5}  
+                                    value={manualsAndCerts.public} 
+                                    onChange={(e) => {setManualsAndCerts({public: e.target.value, private: manualsAndCerts.private})}} 
+                                />
+                                <br /><br />
+                                Private: <TextField 
+                                    placeholder=' - Receipts for the supply chain (could we incorporate a scanner in future, for now, it is only for upload, for MVP
+                                        - Taxation documents
+                                        - Basically anything related to the product, which the customer does not need to see or could impact the strategic advantage of the brand, hence private, so it is available for audit, but not for general consumption. These documents are only visible to people with a higher login authority, which will also be split into multiple roles'
+                                    sx={{ width: '80%' }} 
+                                    variant="outlined" 
+                                    multiline 
+                                    rows={5}  
+                                    value={manualsAndCerts.private} 
+                                    onChange={(e) => {setManualsAndCerts({private: e.target.value, public: manualsAndCerts.public})}} 
+                                />
+                            </TabPanel>
+                        </Tabs>
+
                         <Button variant='outlined' onClick={addProductHandler} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Add Product</Button>
                         <br/><br/>
                         <DataGrid
