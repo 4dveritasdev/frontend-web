@@ -8,7 +8,8 @@ const QRCode = ({data}) => {
     
     useEffect(() => {
         (async () => {
-            const code = await qrcode.toDataURL(data);
+            console.log(data);
+            const code = await qrcode.toDataURL('https://parisbrewerytours.com?qrcode=' + data);
             setQRcodeImage(code);
         })()
     }, [data]);
