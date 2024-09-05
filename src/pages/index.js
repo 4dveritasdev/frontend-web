@@ -1,4 +1,4 @@
-import { Box, Button, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
@@ -10,7 +10,6 @@ import Tabs from '@mui/joy/Tabs';
 import TabList from '@mui/joy/TabList';
 import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel';
-import { NumericFormat } from 'react-number-format';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -24,7 +23,11 @@ const Page = () => {
     const [mintAmount, setMintAmout] = useState(0);
     const [qrcodes, setQrCodes] = useState([]);
     const [productImages, setProductImages] = useState([]);
+    const [wgImages, setWGImages] = useState([]);
+    const [mcImages, setMCImages] = useState([]);
     const [productImageInputs, setProductImageInputs] = useState([]);
+    const [wgImageInputs, setWGImageInputs] = useState([]);
+    const [mcImageInputs, setMCImageInputs] = useState([]);
     const [productFiles, setProductFiles] = useState([]);
     const [productFileInputs, setProductFileInputs] = useState([]);
     const [warrantyPeriod, setWarrantyPeriod] = useState(0);
@@ -36,6 +39,12 @@ const Page = () => {
         private: ''
     });
     const [productVideos, setProductVideos] = useState([]);
+    const [wgVideos, setWGVideos] = useState([]);
+    const [mcVideos, setMCVideos] = useState([]);
+    const [noWarranty, setNoWarranty] = useState(false);
+    const [lifetimeWarranty, setLifetimeWarranty] = useState(false);
+    const [noGuarantee, setNoGuarantee] = useState(false);
+    const [lifetimeGuarantee, setLifetimeGuarantee] = useState(false);
     const [updates, setUpdates] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
     const [page, setPage] = useState(1);
@@ -102,7 +111,36 @@ const Page = () => {
             alert('please fill all fields and upload an image');
             return;
         }
-        await addProduct({name: productName, model: productModel, detail: productDetail, company_id: company._id, images:productImages, files: productFiles, videos: productVideos, warrantyAndGuarantee: { warranty: {period: warrantyPeriod, unit: warrantyUnit}, guarantee: {period: guaranteePeriod, unit: guaranteeUnit}}, manualsAndCerts});
+        await addProduct({
+            name: productName,
+            model: productModel, 
+            detail: productDetail, 
+            company_id: company._id, 
+            images:productImages, 
+            files: productFiles, 
+            videos: productVideos, 
+            warrantyAndGuarantee: {
+                images: wgImages,
+                videos: wgVideos,
+                warranty: {
+                    period: warrantyPeriod, 
+                    unit: warrantyUnit,
+                    notime: noWarranty,
+                    lifetime: lifetimeWarranty
+                }, 
+                guarantee: {
+                    period: guaranteePeriod, 
+                    unit: guaranteeUnit,
+                    notime: noGuarantee,
+                    lifetime: lifetimeGuarantee
+                }
+            }, 
+            manualsAndCerts: {
+                images: mcImages,
+                videos: mcVideos,
+                ...manualsAndCerts
+            }
+        });
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
             id: i + 1,
@@ -114,9 +152,19 @@ const Page = () => {
         setProductModel('');
         setProductDetail('');
         setProductImages([]);
+        setWGImages([]);
+        setMCImages([]);
         setProductFiles([]);
         setProductVideos([]);
+        setWGVideos([]);
+        setMCVideos([]);
         setProductImageInputs([]);
+        setWGImageInputs([]);
+        setMCImageInputs([]);
+        setNoWarranty(false);
+        setLifetimeWarranty(false);
+        setNoGuarantee(false);
+        setLifetimeGuarantee(false);
         setProductFileInputs([]);
         setWarrantyPeriod(0);
         setWarrantyUnit(0);
@@ -231,6 +279,58 @@ const Page = () => {
         }
     };
     console.log(productImages);
+    
+    const handleWGImageChange = async (event, i) => {
+        event.stopPropagation();
+        if (event.target.files && event.target.files.length) {
+          
+            const body = new FormData();
+            for (const single_file of event.target.files) {
+                body.append("files", single_file);
+            }
+            const res = await uploadFiles(body);
+
+            let temp = wgImageInputs;
+            temp[i] = res;
+            setWGImageInputs(temp);
+
+            let images = [];
+            for (let inputs of temp) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+            setWGImages(images);
+
+            // setProductImages(res);
+        }
+    };
+    
+    const handleMCImageChange = async (event, i) => {
+        event.stopPropagation();
+        if (event.target.files && event.target.files.length) {
+          
+            const body = new FormData();
+            for (const single_file of event.target.files) {
+                body.append("files", single_file);
+            }
+            const res = await uploadFiles(body);
+
+            let temp = mcImageInputs;
+            temp[i] = res;
+            setMCImageInputs(temp);
+
+            let images = [];
+            for (let inputs of temp) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+            setMCImages(images);
+
+            // setProductImages(res);
+        }
+    };
 
     const handleProductFilesChange = async (event, i) => {
         event.stopPropagation();
@@ -263,10 +363,38 @@ const Page = () => {
         setUpdates(updates + 1);
     }
     
+    const handleWGVideoAddClick = () => {
+        let temp = wgVideos;
+        temp.push({url: '', description: ''});
+        setWGVideos(temp);
+        setUpdates(updates + 1);
+    }
+    
+    const handleMCVideoAddClick = () => {
+        let temp = mcVideos;
+        temp.push({url: '', description: ''});
+        setMCVideos(temp);
+        setUpdates(updates + 1);
+    }
+    
     const handleProductImageAddClick = () => {
         let temp = productImageInputs;
         temp.push([]);
         setProductImageInputs(temp);
+        setUpdates(updates + 1);
+    }
+
+    const handleWGImageAddClick = () => {
+        let temp = wgImageInputs;
+        temp.push([]);
+        setWGImageInputs(temp);
+        setUpdates(updates + 1);
+    }
+
+    const handleMCImageAddClick = () => {
+        let temp = mcImageInputs;
+        temp.push([]);
+        setMCImageInputs(temp);
         setUpdates(updates + 1);
     }
     
@@ -287,6 +415,32 @@ const Page = () => {
         let temp = productVideos;
         temp[i].description = e.target.value;
         setProductVideos(temp);
+        setUpdates(updates + 1);
+    }
+
+    const handleWGVideoUrlChange = (e, i) => {
+        let temp = wgVideos;
+        temp[i].url = e.target.value;
+        setWGVideos(temp);
+        setUpdates(updates + 1);
+    }
+    const handleWGVideoDescriptionChange = (e, i) => {
+        let temp = wgVideos;
+        temp[i].description = e.target.value;
+        setWGVideos(temp);
+        setUpdates(updates + 1);
+    }
+
+    const handleMCVideoUrlChange = (e, i) => {
+        let temp = mcVideos;
+        temp[i].url = e.target.value;
+        setMCVideos(temp);
+        setUpdates(updates + 1);
+    }
+    const handleMCVideoDescriptionChange = (e, i) => {
+        let temp = mcVideos;
+        temp[i].description = e.target.value;
+        setMCVideos(temp);
         setUpdates(updates + 1);
     }
 
@@ -340,16 +494,14 @@ const Page = () => {
                                     </>
                                 ))}
 
-                                {/* <input type='file' onChange={handleProductImageChange} multiple/> */}
-                                Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
+                                {/* Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
                                 <br/><br/>
-                                {/* <input type='file' onChange={handleProductFilesChange} multiple/> */}
                                 {productFileInputs.map((files, i) => (
                                     <>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
                                         <br/><br/>
                                     </>
-                                ))}
+                                ))} */}
                                 Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
                                 <br/><br/>
                                 {productVideos.map((video, i) => (
@@ -362,6 +514,25 @@ const Page = () => {
                             </TabPanel>
                             <TabPanel value={1}>
                                 <>
+                                    Images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
+                                    <br/><br/>
+                                    {wgImageInputs.map((images, i) => (
+                                        <>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple/>
+                                            <br/><br/>
+                                        </>
+                                    ))}
+
+                                    Youtube Videos: <Button variant='outlined' onClick={handleWGVideoAddClick}>+</Button>
+                                    <br/><br/>
+                                    {wgVideos.map((video, i) => (
+                                        <>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleWGVideoUrlChange(e, i)} /> &nbsp;
+                                            <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleWGVideoDescriptionChange(e, i)} /> &nbsp;
+                                            <br/><br/>
+                                        </>
+                                    ))}
+
                                     Warranty: &nbsp;&nbsp;
                                     <TextField 
                                         type='number' 
@@ -371,15 +542,32 @@ const Page = () => {
                                         sx={{ width: 80}}
                                         value={warrantyPeriod} 
                                         onChange={(e) => {setWarrantyPeriod(e.target.value)}} 
+                                        disabled={noWarranty | lifetimeWarranty}
                                     /> &nbsp;
                                     <Select
                                         value={warrantyUnit} 
                                         onChange={(e) => {setWarrantyUnit(e.target.value)}} 
                                         size='small'
+                                        disabled={noWarranty | lifetimeWarranty}
                                     >
                                         <MenuItem value={0}>Week</MenuItem>
                                         <MenuItem value={1}>Month</MenuItem>
                                     </Select>
+                                    <br/> <br/>
+                                    <Checkbox sx={{ p:0, pl: 4}} checked={noWarranty} 
+                                        onChange={(e) => {
+                                            if(!noWarranty) {
+                                                setLifetimeWarranty(false);
+                                            }
+                                            setNoWarranty(!noWarranty)
+                                        }} /> No Warranty
+                                    <Checkbox sx={{ p:0, pl: 2}} checked={lifetimeWarranty} 
+                                        onChange={(e) => {
+                                            if(!lifetimeWarranty) {
+                                                setNoWarranty(false);
+                                            }
+                                            setLifetimeWarranty(!lifetimeWarranty)
+                                        }}/> Lifetime Warranty
                                     <br /><br />
                                     Guarantee: &nbsp;&nbsp;
                                     <TextField 
@@ -390,19 +578,55 @@ const Page = () => {
                                         sx={{ width: 80}}
                                         value={guaranteePeriod} 
                                         onChange={(e) => {setGuaranteePeriod(e.target.value)}} 
+                                        disabled={noGuarantee | lifetimeGuarantee}
                                     /> &nbsp;
                                     <Select
                                         value={guaranteeUnit} 
                                         onChange={(e) => {setGuaranteeUnit(e.target.value)}} 
                                         size='small'
+                                        disabled={noGuarantee | lifetimeGuarantee}
                                     >
                                         <MenuItem value={0}>Week</MenuItem>
                                         <MenuItem value={1}>Month</MenuItem>
                                     </Select>
+                                    <br/> <br/>
+                                    <Checkbox sx={{ p:0, pl: 4}} checked={noGuarantee} 
+                                        onChange={(e) => {
+                                            if(!noGuarantee) {
+                                                setLifetimeGuarantee(false);
+                                            }
+                                            setNoGuarantee(!noGuarantee)
+                                        }} /> No Guarantee
+                                    <Checkbox sx={{ p:0, pl: 2}} checked={lifetimeGuarantee} 
+                                        onChange={(e) => {
+                                            if(!lifetimeGuarantee) {
+                                                setNoGuarantee(false);
+                                            }
+                                            setLifetimeGuarantee(!lifetimeGuarantee)
+                                        }}/> Lifetime Guarantee
                                     <br/><br/>
                                 </>
                             </TabPanel>
                             <TabPanel value={2}>
+                                Images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
+                                <br/><br/>
+                                {mcImageInputs.map((images, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple/>
+                                        <br/><br/>
+                                    </>
+                                ))}
+
+                                Youtube Videos: <Button variant='outlined' onClick={handleMCVideoAddClick}>+</Button>
+                                <br/><br/>
+                                {mcVideos.map((video, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleMCVideoUrlChange(e, i)} /> &nbsp;
+                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleMCVideoDescriptionChange(e, i)} /> &nbsp;
+                                        <br/><br/>
+                                    </>
+                                ))}
+
                                 Public: <TextField 
                                     placeholder=' - User manuals
                                         - Assembly manuals
