@@ -278,7 +278,6 @@ const Page = () => {
             // setProductImages(res);
         }
     };
-    console.log(productImages);
     
     const handleWGImageChange = async (event, i) => {
         event.stopPropagation();
@@ -335,6 +334,7 @@ const Page = () => {
     const handleProductFilesChange = async (event, i) => {
         event.stopPropagation();
         if (event.target.files && event.target.files.length) {
+            console.log('uploading files');
           
             const body = new FormData();
             for (const single_file of event.target.files) {
@@ -352,6 +352,7 @@ const Page = () => {
                     files.push(file);
                 }
             }
+            console.log(files);
             setProductFiles(files);
         }
     };
@@ -494,14 +495,14 @@ const Page = () => {
                                     </>
                                 ))}
 
-                                {/* Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
+                                Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
                                 <br/><br/>
                                 {productFileInputs.map((files, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
                                         <br/><br/>
                                     </>
-                                ))} */}
+                                ))}
                                 Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
                                 <br/><br/>
                                 {productVideos.map((video, i) => (
