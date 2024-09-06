@@ -30,6 +30,10 @@ const Page = () => {
     const [mcImageInputs, setMCImageInputs] = useState([]);
     const [productFiles, setProductFiles] = useState([]);
     const [productFileInputs, setProductFileInputs] = useState([]);
+    const [wgFiles, setWGFiles] = useState([]);
+    const [wgFileInputs, setWGFileInputs] = useState([]);
+    const [mcFiles, setMCFiles] = useState([]);
+    const [mcFileInputs, setMCFileInputs] = useState([]);
     const [warrantyPeriod, setWarrantyPeriod] = useState(0);
     const [warrantyUnit, setWarrantyUnit] = useState(0);
     const [guaranteePeriod, setGuaranteePeriod] = useState(0);
@@ -121,6 +125,7 @@ const Page = () => {
             videos: productVideos, 
             warrantyAndGuarantee: {
                 images: wgImages,
+                files: wgFiles,
                 videos: wgVideos,
                 warranty: {
                     period: warrantyPeriod, 
@@ -137,6 +142,7 @@ const Page = () => {
             }, 
             manualsAndCerts: {
                 images: mcImages,
+                files: mcFiles,
                 videos: mcVideos,
                 ...manualsAndCerts
             }
@@ -155,6 +161,8 @@ const Page = () => {
         setWGImages([]);
         setMCImages([]);
         setProductFiles([]);
+        setWGFiles([]);
+        setMCFiles([]);
         setProductVideos([]);
         setWGVideos([]);
         setMCVideos([]);
@@ -166,6 +174,8 @@ const Page = () => {
         setNoGuarantee(false);
         setLifetimeGuarantee(false);
         setProductFileInputs([]);
+        setWGFileInputs([]);
+        setMCFileInputs([]);
         setWarrantyPeriod(0);
         setWarrantyUnit(0);
         setGuaranteePeriod(0);
@@ -357,6 +367,58 @@ const Page = () => {
         }
     };
 
+    const handleWGFilesChange = async (event, i) => {
+        event.stopPropagation();
+        if (event.target.files && event.target.files.length) {
+            console.log('uploading files');
+          
+            const body = new FormData();
+            for (const single_file of event.target.files) {
+                body.append("files", single_file);
+            }
+            const res = await uploadFiles(body);
+            
+            let temp = wgFileInputs;
+            temp[i] = res;
+            setWGFileInputs(temp);
+
+            let files = [];
+            for (let inputs of temp) {
+                for (let file of inputs) {
+                    files.push(file);
+                }
+            }
+            console.log(files);
+            setWGFiles(files);
+        }
+    };
+
+    const handleMCFilesChange = async (event, i) => {
+        event.stopPropagation();
+        if (event.target.files && event.target.files.length) {
+            console.log('uploading files');
+          
+            const body = new FormData();
+            for (const single_file of event.target.files) {
+                body.append("files", single_file);
+            }
+            const res = await uploadFiles(body);
+            
+            let temp = mcFileInputs;
+            temp[i] = res;
+            setMCFileInputs(temp);
+
+            let files = [];
+            for (let inputs of temp) {
+                for (let file of inputs) {
+                    files.push(file);
+                }
+            }
+            console.log(files);
+            setMCFiles(files);
+        }
+    };
+
     const handleProductVideoAddClick = () => {
         let temp = productVideos;
         temp.push({url: '', description: ''});
@@ -403,6 +465,20 @@ const Page = () => {
         let temp = productFileInputs;
         temp.push([]);
         setProductFileInputs(temp);
+        setUpdates(updates + 1);
+    }
+    
+    const handleWGFileAddClick = () => {
+        let temp = wgFileInputs;
+        temp.push([]);
+        setWGFileInputs(temp);
+        setUpdates(updates + 1);
+    }
+    
+    const handleMCFileAddClick = () => {
+        let temp = mcFileInputs;
+        temp.push([]);
+        setMCFileInputs(temp);
         setUpdates(updates + 1);
     }
 
@@ -524,6 +600,15 @@ const Page = () => {
                                         </>
                                     ))}
 
+                                    Files: <Button variant='outlined' onClick={handleWGFileAddClick}>+</Button>
+                                    <br/><br/>
+                                    {wgFileInputs.map((files, i) => (
+                                        <>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleWGFilesChange(e, i)}} multiple/>
+                                            <br/><br/>
+                                        </>
+                                    ))}
+
                                     Youtube Videos: <Button variant='outlined' onClick={handleWGVideoAddClick}>+</Button>
                                     <br/><br/>
                                     {wgVideos.map((video, i) => (
@@ -614,6 +699,15 @@ const Page = () => {
                                 {mcImageInputs.map((images, i) => (
                                     <>
                                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple/>
+                                        <br/><br/>
+                                    </>
+                                ))}
+
+                                Files: <Button variant='outlined' onClick={handleMCFileAddClick}>+</Button>
+                                <br/><br/>
+                                {mcFileInputs.map((files, i) => (
+                                    <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleMCFilesChange(e, i)}} multiple/>
                                         <br/><br/>
                                     </>
                                 ))}
