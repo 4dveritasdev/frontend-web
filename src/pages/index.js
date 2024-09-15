@@ -10,6 +10,7 @@ import Tabs from '@mui/joy/Tabs';
 import TabList from '@mui/joy/TabList';
 import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel';
+import PreviewModal from '../components/PreviewModal';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -261,8 +262,10 @@ const Page = () => {
 
     const handleProductImageChange = async (event, i) => {
         event.stopPropagation();
+        console.log(event.target.value);
         if (event.target.files && event.target.files.length) {
         //   const file = event.target.files[0];
+            console.log(event.target.files[0]);
         //   const body = new FormData();
         //   body.append("file", file);
         //   const res = await uploadFile(body);
@@ -522,6 +525,7 @@ const Page = () => {
     }
 
     const [openPrintModal, setOpenPrintModal] = useState(false);
+    const [openPreviewModal, setOpenPreviewModal] = useState(false);
 
     return (
         <Box sx={{ p: 5 }}>
@@ -750,6 +754,8 @@ const Page = () => {
                             </TabPanel>
                         </Tabs>
 
+                        <Button variant='outlined' onClick={() => {setOpenPreviewModal(true)}} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Preview</Button>
+                        <br/><br/>
                         <Button variant='outlined' onClick={addProductHandler} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Add Product</Button>
                         <br/><br/>
                         <DataGrid
@@ -806,6 +812,38 @@ const Page = () => {
                 </>
             }
             {selectedProduct && <PrintModal open={openPrintModal} setOpen={setOpenPrintModal} totalAmount={totalAmount} product={selectedProduct} setProduct={setSelectedProduct}/>}
+            {company && <PreviewModal open={openPreviewModal} setOpen={setOpenPreviewModal} productInfo={{
+                name: productName,
+                model: productModel, 
+                detail: productDetail, 
+                company_id: company._id, 
+                images:productImages, 
+                files: productFiles, 
+                videos: productVideos, 
+                warrantyAndGuarantee: {
+                    images: wgImages,
+                    files: wgFiles,
+                    videos: wgVideos,
+                    warranty: {
+                        period: warrantyPeriod, 
+                        unit: warrantyUnit,
+                        notime: noWarranty,
+                        lifetime: lifetimeWarranty
+                    }, 
+                    guarantee: {
+                        period: guaranteePeriod, 
+                        unit: guaranteeUnit,
+                        notime: noGuarantee,
+                        lifetime: lifetimeGuarantee
+                    }
+                }, 
+                manualsAndCerts: {
+                    images: mcImages,
+                    files: mcFiles,
+                    videos: mcVideos,
+                    ...manualsAndCerts
+                }
+            }}/>}
         </Box>
     );
 }
