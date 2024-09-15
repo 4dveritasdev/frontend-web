@@ -93,7 +93,7 @@ export default function PreviewModal({open, setOpen, productInfo }) {
 
   const opts = {
     width: '100%',
-    height: window.innerWidth * 0.7,
+    height: 280,
     playerVars: {
       autoplay: 1,
     },

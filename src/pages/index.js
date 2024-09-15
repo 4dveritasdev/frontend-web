@@ -11,6 +11,7 @@ import TabList from '@mui/joy/TabList';
 import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel';
 import PreviewModal from '../components/PreviewModal';
+import { useRef } from 'react';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -57,6 +58,18 @@ const Page = () => {
     const [isMinting, setIsMinting] = useState(false);
     const [startAmount, setStartAmount] = useState(0);
     const [mintingProgress, setMintingProgress] = useState(0);
+    const productImageInputRefs = useRef([]);
+    const productFileInputRefs = useRef([]); 
+    productImageInputRefs.current = productImageInputs.map((_, i) => productImageInputRefs.current[i] ?? React.createRef());
+    productFileInputRefs.current = productFileInputs.map((_, i) => productFileInputRefs.current[i] ?? React.createRef());
+    const wgImageInputRefs = useRef([]);
+    const wgFileInputRefs = useRef([]); 
+    wgImageInputRefs.current = wgImageInputs.map((_, i) => wgImageInputRefs.current[i] ?? React.createRef());
+    wgFileInputRefs.current = wgFileInputs.map((_, i) => wgFileInputRefs.current[i] ?? React.createRef());
+    const mcImageInputRefs = useRef([]);
+    const mcFileInputRefs = useRef([]); 
+    mcImageInputRefs.current = mcImageInputs.map((_, i) => mcImageInputRefs.current[i] ?? React.createRef());
+    mcFileInputRefs.current = mcFileInputs.map((_, i) => mcFileInputRefs.current[i] ?? React.createRef());
 
     useEffect(() => {
         console.log('socket');
@@ -570,7 +583,22 @@ const Page = () => {
                                 <br/><br/>
                                 {productImageInputs.map((images, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={productImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => productImageInputRefs.current[i]?.current.click()}
+                                            size='small'
+                                        >
+                                            Choose Files
+                                        </Button>
+
+                                        <span>
+                                            {productImageInputs[i]?.length > 0 ? (
+                                                <> {productImageInputs[i].length} files</>
+                                            ) : (
+                                                <> No file chosen</>
+                                            )}
+                                        </span>
                                         <br/><br/>
                                     </>
                                 ))}
@@ -579,7 +607,22 @@ const Page = () => {
                                 <br/><br/>
                                 {productFileInputs.map((files, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleProductFilesChange(e, i)}} multiple/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={productFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleProductFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => productFileInputRefs.current[i]?.current.click()}
+                                            size='small'
+                                        >
+                                            Choose Files
+                                        </Button>
+
+                                        <span>
+                                            {productFileInputs[i]?.length > 0 ? (
+                                                <> {productFileInputs[i].length} files</>
+                                            ) : (
+                                                <> No file chosen</>
+                                            )}
+                                        </span>
                                         <br/><br/>
                                     </>
                                 ))}
@@ -599,7 +642,22 @@ const Page = () => {
                                     <br/><br/>
                                     {wgImageInputs.map((images, i) => (
                                         <>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={wgImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => wgImageInputRefs.current[i]?.current.click()}
+                                                size='small'
+                                            >
+                                                Choose Files
+                                            </Button>
+
+                                            <span>
+                                                {wgImageInputs[i]?.length > 0 ? (
+                                                    <> {wgImageInputs[i].length} files</>
+                                                ) : (
+                                                    <> No file chosen</>
+                                                )}
+                                            </span>
                                             <br/><br/>
                                         </>
                                     ))}
@@ -608,7 +666,22 @@ const Page = () => {
                                     <br/><br/>
                                     {wgFileInputs.map((files, i) => (
                                         <>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleWGFilesChange(e, i)}} multiple/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={wgFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleWGFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => wgFileInputRefs.current[i]?.current.click()}
+                                                size='small'
+                                            >
+                                                Choose Files
+                                            </Button>
+
+                                            <span>
+                                                {wgFileInputs[i]?.length > 0 ? (
+                                                    <> {wgFileInputs[i].length} files</>
+                                                ) : (
+                                                    <> No file chosen</>
+                                                )}
+                                            </span>
                                             <br/><br/>
                                         </>
                                     ))}
@@ -702,7 +775,22 @@ const Page = () => {
                                 <br/><br/>
                                 {mcImageInputs.map((images, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={mcImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => mcImageInputRefs.current[i]?.current.click()}
+                                            size='small'
+                                        >
+                                            Choose Files
+                                        </Button>
+
+                                        <span>
+                                            {mcImageInputs[i]?.length > 0 ? (
+                                                <> {mcImageInputs[i].length} files</>
+                                            ) : (
+                                                <> No file chosen</>
+                                            )}
+                                        </span>
                                         <br/><br/>
                                     </>
                                 ))}
@@ -711,7 +799,22 @@ const Page = () => {
                                 <br/><br/>
                                 {mcFileInputs.map((files, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input key={i} type='file' accept='.pdf' onChange={(e) => {handleMCFilesChange(e, i)}} multiple/>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={mcFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleMCFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => mcFileInputRefs.current[i]?.current.click()}
+                                            size='small'
+                                        >
+                                            Choose Files
+                                        </Button>
+
+                                        <span>
+                                            {mcFileInputs[i]?.length > 0 ? (
+                                                <> {mcFileInputs[i].length} files</>
+                                            ) : (
+                                                <> No file chosen</>
+                                            )}
+                                        </span>
                                         <br/><br/>
                                     </>
                                 ))}
