@@ -1,4 +1,4 @@
-import { Box, Button, Checkbox, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, IconButton, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
@@ -12,6 +12,8 @@ import Tab from '@mui/joy/Tab';
 import TabPanel from '@mui/joy/TabPanel';
 import PreviewModal from '../components/PreviewModal';
 import { useRef } from 'react';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -284,9 +286,9 @@ const Page = () => {
                 return (
                     <>
                         {data.value === 0 && <Box sx={{ display: 'flex', }}>
-                            <Button variant='contained' color='success' onClick={() => {editProductHandler(data.id - 1)}}>Edit</Button>
+                            <IconButton onClick={() => {editProductHandler(data.id - 1)}} sx={{ p: 0 }}><EditIcon/></IconButton>
                             &nbsp;
-                            <Button variant='contained' color='error' onClick={() => {deleteProductHandler(data.id - 1)}}>Delete</Button>
+                            <IconButton onClick={() => {deleteProductHandler(data.id - 1)}} sx={{ p: 0 }}><DeleteIcon/></IconButton>
                         </Box>}
                     </>);
             }
