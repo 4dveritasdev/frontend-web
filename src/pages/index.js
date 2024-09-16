@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, uploadFile, uploadFiles } from '../helper';
+import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
@@ -71,6 +71,8 @@ const Page = () => {
     mcImageInputRefs.current = mcImageInputs.map((_, i) => mcImageInputRefs.current[i] ?? React.createRef());
     mcFileInputRefs.current = mcFileInputs.map((_, i) => mcFileInputRefs.current[i] ?? React.createRef());
 
+    const [isEditing, setIsEditing] = useState(0);
+
     useEffect(() => {
         console.log('socket');
         const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
@@ -123,6 +125,41 @@ const Page = () => {
         const res = await registerCompany({name, password});
         setCompany(res);
     }
+    
+    const resetFields = () => {
+        setProductName('');
+        setProductModel('');
+        setProductDetail('');
+        setProductImages([]);
+        setWGImages([]);
+        setMCImages([]);
+        setProductFiles([]);
+        setWGFiles([]);
+        setMCFiles([]);
+        setProductVideos([]);
+        setWGVideos([]);
+        setMCVideos([]);
+        setProductImageInputs([]);
+        setWGImageInputs([]);
+        setMCImageInputs([]);
+        setNoWarranty(false);
+        setLifetimeWarranty(false);
+        setNoGuarantee(false);
+        setLifetimeGuarantee(false);
+        setProductFileInputs([]);
+        setWGFileInputs([]);
+        setMCFileInputs([]);
+        setWarrantyPeriod(0);
+        setWarrantyUnit(0);
+        setGuaranteePeriod(0);
+        setGuaranteeUnit(0);
+        setManualsAndCerts({
+            public: '',
+            private: ''
+        });
+        setIsEditing(0);
+        setUpdates(0);
+    }
 
     const addProductHandler = async () => {
         if (productName == '' || productDetail == '' || productImages.length == 0) {
@@ -167,38 +204,54 @@ const Page = () => {
             ...p
         }));
         setProducts(ptmp);
+        resetFields();
+    }
 
-        setProductName('');
-        setProductModel('');
-        setProductDetail('');
-        setProductImages([]);
-        setWGImages([]);
-        setMCImages([]);
-        setProductFiles([]);
-        setWGFiles([]);
-        setMCFiles([]);
-        setProductVideos([]);
-        setWGVideos([]);
-        setMCVideos([]);
-        setProductImageInputs([]);
-        setWGImageInputs([]);
-        setMCImageInputs([]);
-        setNoWarranty(false);
-        setLifetimeWarranty(false);
-        setNoGuarantee(false);
-        setLifetimeGuarantee(false);
-        setProductFileInputs([]);
-        setWGFileInputs([]);
-        setMCFileInputs([]);
-        setWarrantyPeriod(0);
-        setWarrantyUnit(0);
-        setGuaranteePeriod(0);
-        setGuaranteeUnit(0);
-        setManualsAndCerts({
-            public: '',
-            private: ''
+    const updateProductHandler = async () => {
+        if (productName == '' || productDetail == '' || productImages.length == 0) {
+            alert('please fill all fields and upload an image');
+            return;
+        }
+        await updateProduct({
+            _id: isEditing,
+            name: productName,
+            model: productModel, 
+            detail: productDetail, 
+            company_id: company._id, 
+            images:productImages, 
+            files: productFiles, 
+            videos: productVideos, 
+            warrantyAndGuarantee: {
+                images: wgImages,
+                files: wgFiles,
+                videos: wgVideos,
+                warranty: {
+                    period: warrantyPeriod, 
+                    unit: warrantyUnit,
+                    notime: noWarranty,
+                    lifetime: lifetimeWarranty
+                }, 
+                guarantee: {
+                    period: guaranteePeriod, 
+                    unit: guaranteeUnit,
+                    notime: noGuarantee,
+                    lifetime: lifetimeGuarantee
+                }
+            }, 
+            manualsAndCerts: {
+                images: mcImages,
+                files: mcFiles,
+                videos: mcVideos,
+                ...manualsAndCerts
+            }
         });
-        setUpdates(0);
+        const res = await getCompanyProducts({ company_id: company._id });
+        const ptmp = res.map((p, i) => ({
+            id: i + 1,
+            ...p
+        }));
+        setProducts(ptmp);
+        resetFields();
     }
 
     useEffect(() => {
@@ -226,6 +279,19 @@ const Page = () => {
                 return (<span style={{whiteSpace: "pre-line", padding: 10}}>{data.value}</span>);
             }
         },
+        { field: 'total_minted_amount', headerName: 'Actions', width: 200,
+            renderCell: (data) => {
+                return (
+                    <>
+                        {data.value === 0 && <Box sx={{ display: 'flex', }}>
+                            <Button variant='contained' color='success' onClick={() => {editProductHandler(data.id - 1)}}>Edit</Button>
+                            &nbsp;
+                            <Button variant='contained' color='error' onClick={() => {deleteProductHandler(data.id - 1)}}>Delete</Button>
+                        </Box>}
+                    </>);
+            }
+        },
+
         // { field: 'detail', headerName: 'Details', width: 200,
         //     renderCell: (data) => {
         //         return (<span style={{whiteSpace: "pre-line", padding: 10}}>{data.value}</span>);
@@ -235,8 +301,58 @@ const Page = () => {
         // { field: 'contract_address', headerName: 'Contract Address', width: 360 }
     ];
 
+    const editProductHandler = async (id) => {
+        setIsEditing(products[id]._id);
+        
+        setProductName(products[id].name);
+        setProductModel(products[id].model);
+        setProductDetail(products[id].detail);
+        setProductImages(products[id].images);
+        setWGImages(products[id].warrantyAndGuarantee.images);
+        setMCImages(products[id].manualsAndCerts.images);;
+        setProductFiles(products[id].files);
+        setWGFiles(products[id].warrantyAndGuarantee.files);
+        setMCFiles(products[id].manualsAndCerts.files);
+        setProductVideos(products[id].videos);
+        setWGVideos(products[id].warrantyAndGuarantee.videos);
+        setMCVideos(products[id].manualsAndCerts.videos);
+        setProductImageInputs([products[id].images]);
+        setWGImageInputs([products[id].warrantyAndGuarantee.images]);
+        setMCImageInputs([products[id].manualsAndCerts.images]);
+        setNoWarranty(products[id].warrantyAndGuarantee.warranty.notime);
+        setLifetimeWarranty(products[id].warrantyAndGuarantee.warranty.lifetime);
+        setNoGuarantee(products[id].warrantyAndGuarantee.guarantee.notime);
+        setLifetimeGuarantee(products[id].warrantyAndGuarantee.guarantee.lifetime);
+        setProductFileInputs([products[id].files]);
+        setWGFileInputs([products[id].warrantyAndGuarantee.files]);
+        setMCFileInputs([products[id].manualsAndCerts.files]);
+        setWarrantyPeriod(products[id].warrantyAndGuarantee.warranty.period);
+        setWarrantyUnit(products[id].warrantyAndGuarantee.warranty.unit);
+        setGuaranteePeriod(products[id].warrantyAndGuarantee.guarantee.period);
+        setGuaranteeUnit(products[id].warrantyAndGuarantee.guarantee.unit);
+        setManualsAndCerts({
+            public: products[id].manualsAndCerts.public,
+            private: products[id].manualsAndCerts.private
+        });
+    }
+    
+    const deleteProductHandler = async (id) => {
+
+        await removeProduct(products[id]._id);
+
+        const res = await getCompanyProducts({ company_id: company._id });
+        const ptmp = res.map((p, i) => ({
+            id: i + 1,
+            ...p
+        }));
+        setProducts(ptmp);
+        resetFields();
+
+    }
+
     const productSelectHandler = (data) => {
         setSelectedProduct(data);
+        console.log(data);
         setTotalAmount(data.total_minted_amount)
     }
     
@@ -859,7 +975,9 @@ const Page = () => {
 
                         <Button variant='outlined' onClick={() => {setOpenPreviewModal(true)}} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Preview</Button>
                         <br/><br/>
-                        <Button variant='outlined' onClick={addProductHandler} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Add Product</Button>
+                        {!isEditing > 0
+                            ? <Button variant='outlined' onClick={addProductHandler} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Add Product</Button>
+                            : <Button variant='outlined' onClick={updateProductHandler} disabled={!(productName != '' && productDetail != '' && productImages. length > 0)}>Update Product</Button>}
                         <br/><br/>
                         <DataGrid
                             rows={products}

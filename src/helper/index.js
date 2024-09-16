@@ -45,6 +45,26 @@ export const addProduct = async (data) => {
     }
 }
 
+export const updateProduct = async (data) => {
+    try {
+        await axios.put(`${Backend_URL}product/${data._id}`, data);
+        alert('product successfully updated');
+    } catch(err) {
+        console.log(err);
+        alert('Failed: ' + err.response.data.message);
+    }
+}
+
+export const removeProduct = async (id) => {
+    try {
+        await axios.delete(`${Backend_URL}product/${id}`);
+        alert('product successfully removed');
+    } catch(err) {
+        console.log(err);
+        alert('Failed: ' + err.response.data.message);
+    }
+}
+
 export const printProductQRCodes = async (id, count) => {
     try {
         const res = await axios.post(`${Backend_URL}product/${id}/print`, { count });
@@ -134,10 +154,10 @@ export const uploadFiles = async (body) => {
 
 export const CalculateRemainPeriod = (start, data) => {
     const {period, unit} = data;
-    console.log(start, period, unit);
+    // console.log(start, period, unit);
 
     let startDate = start ? new Date(start.replaceAll('.', '-')) : new Date();
-    console.log(startDate);
+    // console.log(startDate);
 
     let newDate = new Date(startDate);
 
@@ -149,9 +169,9 @@ export const CalculateRemainPeriod = (start, data) => {
 
     let cDate = new Date();
 
-    console.log(newDate, cDate);
+    // console.log(newDate, cDate);
     let duaration = Math.floor((newDate.getTime() - cDate.getTime()) / (24 * 60 * 60 * 1000));
-    console.log(duaration);
+    // console.log(duaration);
 
     let res = '';
     if (duaration >= 7) {
