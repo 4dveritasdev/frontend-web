@@ -14,6 +14,7 @@ import PreviewModal from '../components/PreviewModal';
 import { useRef } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Webcam from 'react-webcam';
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -72,6 +73,9 @@ const Page = () => {
     const mcFileInputRefs = useRef([]); 
     mcImageInputRefs.current = mcImageInputs.map((_, i) => mcImageInputRefs.current[i] ?? React.createRef());
     mcFileInputRefs.current = mcFileInputs.map((_, i) => mcFileInputRefs.current[i] ?? React.createRef());
+    const webcamRef = useRef(null);
+    const productPhotoRef = useRef([]);
+    productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
 
     const [isEditing, setIsEditing] = useState(0);
 
@@ -658,6 +662,11 @@ const Page = () => {
     const [openPrintModal, setOpenPrintModal] = useState(false);
     const [openPreviewModal, setOpenPreviewModal] = useState(false);
 
+    const capturePhoto = async (type, id) => {
+        const imageSrc = webcamRef.current.getScreenshot();
+        console.log(imageSrc);
+    }
+
     return (
         <Box sx={{ p: 5 }}>
             {!company
@@ -717,6 +726,18 @@ const Page = () => {
                                                 <> No file chosen</>
                                             )}
                                         </span>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={capturePhoto}
+                                            size='small'
+                                        >
+                                            Capture Image
+                                        </Button>
+                                        <Webcam
+                                            audio={false}
+                                            ref={webcamRef}
+                                            screenshotFormat="image/jpeg"
+                                        />
                                         <br/><br/>
                                     </>
                                 ))}
