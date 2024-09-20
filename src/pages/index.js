@@ -81,7 +81,7 @@ const Page = () => {
 
     useEffect(() => {
         console.log('socket');
-        const socket = io('http://18.185.202.201:5050/'); // Replace with your server address
+        const socket = io('http://52.44.234.165:5050/'); // Replace with your server address
         // const socket = io('http://localhost:5050/'); // Replace with your server address
         
         socket.on('connect', () => {
