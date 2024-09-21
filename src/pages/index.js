@@ -683,12 +683,13 @@ const Page = () => {
 
     const productCapturePhoto = async () => {
         const imageSrc = productWebcamRef.current.getScreenshot();
-        const response = await fetch(imageSrc);
-        const blob = await response.blob();
-        console.log(blob);
+        // const response = await fetch(imageSrc);
+
+        // const blob = await response.blob();
+        // console.log(blob);
         
         const body = new FormData();
-        body.append("files", [blob]);
+        body.append("file", imageSrc);
         const res = await uploadFiles(body);
         console.log(res);
 
