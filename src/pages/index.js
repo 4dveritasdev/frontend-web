@@ -681,15 +681,29 @@ const Page = () => {
     const [openPrintModal, setOpenPrintModal] = useState(false);
     const [openPreviewModal, setOpenPreviewModal] = useState(false);
 
+    // Convert base64 string to File object
+    const base64ToFile = (base64String, filename) => {
+      const arr = base64String.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], filename, { type: mime });
+    };
+
     const productCapturePhoto = async () => {
         const imageSrc = productWebcamRef.current.getScreenshot();
         // const response = await fetch(imageSrc);
 
         // const blob = await response.blob();
         // console.log(blob);
+        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
         
         const body = new FormData();
-        body.append("file", imageSrc);
+        body.append("file", file);
         const res = await uploadFile(body);
         console.log(res);
 
