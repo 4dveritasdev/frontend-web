@@ -708,11 +708,11 @@ const Page = () => {
         console.log(res);
 
         let temp = productCaptureImages;
-        temp.push(res[0]);
+        temp.push(res);
         setProductCaptureImages(temp);
 
         let images = [];
-        for (let inputs of temp) {
+        for (let inputs of productImageInputs) {
             for (let image of inputs) {
                 images.push(image);
             }
@@ -725,19 +725,22 @@ const Page = () => {
     }
     const wgCapturePhoto = async () => {
         const imageSrc = wgWebcamRef.current.getScreenshot();
-        const response = await fetch(imageSrc);
-        const blob = await response.blob();
+        // const response = await fetch(imageSrc);
+        // const blob = await response.blob();
+        
+        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
         
         const body = new FormData();
-        body.append("files", blob);
-        const res = await uploadFiles(body);
+        body.append("file", file);
+        const res = await uploadFile(body);
+        console.log(res);
 
         let temp = wgCaptureImages;
-        temp.push(res[0]);
+        temp.push(res);
         setWGImages(temp);
 
         let images = [];
-        for (let inputs of temp) {
+        for (let inputs of wgImageInputs) {
             for (let image of inputs) {
                 images.push(image);
             }
@@ -750,19 +753,19 @@ const Page = () => {
     }
     const mcCapturePhoto = async () => {
         const imageSrc = mcWebcamRef.current.getScreenshot();
-        const response = await fetch(imageSrc);
-        const blob = await response.blob();
+        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
         
         const body = new FormData();
-        body.append("files", blob);
-        const res = await uploadFiles(body);
+        body.append("file", file);
+        const res = await uploadFile(body);
+        console.log(res);
 
         let temp = mcCaptureImages;
-        temp.push(res[0]);
+        temp.push(res);
         setMCCaptureImages(temp);
 
         let images = [];
-        for (let inputs of temp) {
+        for (let inputs of mcImageInputs) {
             for (let image of inputs) {
                 images.push(image);
             }
