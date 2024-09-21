@@ -31,6 +31,9 @@ const Page = () => {
     const [wgImages, setWGImages] = useState([]);
     const [mcImages, setMCImages] = useState([]);
     const [productImageInputs, setProductImageInputs] = useState([]);
+    const [productCaptureImages, setProductCaptureImages] = useState([]);
+    const [wgCaptureImages, setWGCaptureImages] = useState([]);
+    const [mcCaptureImages, setMCCaptureImages] = useState([]);
     const [wgImageInputs, setWGImageInputs] = useState([]);
     const [mcImageInputs, setMCImageInputs] = useState([]);
     const [productFiles, setProductFiles] = useState([]);
@@ -73,7 +76,9 @@ const Page = () => {
     const mcFileInputRefs = useRef([]); 
     mcImageInputRefs.current = mcImageInputs.map((_, i) => mcImageInputRefs.current[i] ?? React.createRef());
     mcFileInputRefs.current = mcFileInputs.map((_, i) => mcFileInputRefs.current[i] ?? React.createRef());
-    const webcamRef = useRef(null);
+    const productWebcamRef = useRef(null);
+    const wgWebcamRef = useRef(null);
+    const mcWebcamRef = useRef(null);
     const productPhotoRef = useRef([]);
     productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
 
@@ -159,6 +164,7 @@ const Page = () => {
         setWarrantyUnit(0);
         setGuaranteePeriod(0);
         setGuaranteeUnit(0);
+        setProductCaptureImages([]);
         setManualsAndCerts({
             public: '',
             private: ''
@@ -421,6 +427,11 @@ const Page = () => {
                     images.push(image);
                 }
             }
+    
+            for (let image of productCaptureImages) {
+                images.push(image);
+            }
+
             setProductImages(images);
 
             // setProductImages(res);
@@ -447,6 +458,10 @@ const Page = () => {
                     images.push(image);
                 }
             }
+    
+            for (let image of wgCaptureImages) {
+                images.push(image);
+            }
             setWGImages(images);
 
             // setProductImages(res);
@@ -472,6 +487,10 @@ const Page = () => {
                 for (let image of inputs) {
                     images.push(image);
                 }
+            }
+    
+            for (let image of mcCaptureImages) {
+                images.push(image);
             }
             setMCImages(images);
 
@@ -662,9 +681,80 @@ const Page = () => {
     const [openPrintModal, setOpenPrintModal] = useState(false);
     const [openPreviewModal, setOpenPreviewModal] = useState(false);
 
-    const capturePhoto = async (type, id) => {
-        const imageSrc = webcamRef.current.getScreenshot();
-        console.log(imageSrc);
+    const productCapturePhoto = async () => {
+        const imageSrc = productWebcamRef.current.getScreenshot();
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        
+        const body = new FormData();
+        body.append("files", blob);
+        const res = await uploadFiles(body);
+
+        let temp = productCaptureImages;
+        temp.push(res[0]);
+        setProductCaptureImages(temp);
+
+        let images = [];
+        for (let inputs of temp) {
+            for (let image of inputs) {
+                images.push(image);
+            }
+        }
+
+        for (let image of productCaptureImages) {
+            images.push(image);
+        }
+        setProductImages(images);
+    }
+    const wgCapturePhoto = async () => {
+        const imageSrc = wgWebcamRef.current.getScreenshot();
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        
+        const body = new FormData();
+        body.append("files", blob);
+        const res = await uploadFiles(body);
+
+        let temp = wgCaptureImages;
+        temp.push(res[0]);
+        setWGImages(temp);
+
+        let images = [];
+        for (let inputs of temp) {
+            for (let image of inputs) {
+                images.push(image);
+            }
+        }
+
+        for (let image of wgCaptureImages) {
+            images.push(image);
+        }
+        setWGImages(images);
+    }
+    const mcCapturePhoto = async () => {
+        const imageSrc = mcWebcamRef.current.getScreenshot();
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        
+        const body = new FormData();
+        body.append("files", blob);
+        const res = await uploadFiles(body);
+
+        let temp = mcCaptureImages;
+        temp.push(res[0]);
+        setMCCaptureImages(temp);
+
+        let images = [];
+        for (let inputs of temp) {
+            for (let image of inputs) {
+                images.push(image);
+            }
+        }
+
+        for (let image of mcCaptureImages) {
+            images.push(image);
+        }
+        setMCImages(images);
     }
 
     return (
@@ -706,15 +796,18 @@ const Page = () => {
                                 <Tab>Manuals & Certs</Tab>
                             </TabList>
                             <TabPanel value={0}>
-                                Images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
+                                Images: 
+                                <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
                                 <br/><br/>
                                 {productImageInputs.map((images, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={productImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => productImageInputRefs.current[i]?.current.click()}
                                             size='small'
+                                            sx={{ ml: 8}}
                                         >
                                             Choose Files
                                         </Button>
@@ -726,21 +819,26 @@ const Page = () => {
                                                 <> No file chosen</>
                                             )}
                                         </span>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={capturePhoto}
-                                            size='small'
-                                        >
-                                            Capture Image
-                                        </Button>
-                                        <Webcam
-                                            audio={false}
-                                            ref={webcamRef}
-                                            screenshotFormat="image/jpeg"
-                                        />
                                         <br/><br/>
                                     </>
                                 ))}
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                    variant="outlined"
+                                    onClick={productCapturePhoto}
+                                    size='small'
+                                >
+                                    Capture
+                                </Button>
+                                <span> {productCaptureImages.length} Images captured</span>
+                                <br />
+                                <Webcam
+                                    audio={false}
+                                    ref={productWebcamRef}
+                                    screenshotFormat="image/jpeg"
+                                    width={640}
+                                    height={360}
+                                />
+                                <br/><br/>
 
                                 Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
                                 <br/><br/>
@@ -777,15 +875,18 @@ const Page = () => {
                             </TabPanel>
                             <TabPanel value={1}>
                                 <>
-                                    Images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
+                                    Images: 
+                                    <br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
                                     <br/><br/>
                                     {wgImageInputs.map((images, i) => (
                                         <>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={wgImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                             <Button
                                                 variant="outlined"
                                                 onClick={() => wgImageInputRefs.current[i]?.current.click()}
                                                 size='small'
+                                                sx={{ ml: 8}}
                                             >
                                                 Choose Files
                                             </Button>
@@ -800,6 +901,23 @@ const Page = () => {
                                             <br/><br/>
                                         </>
                                     ))}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                        variant="outlined"
+                                        onClick={wgCapturePhoto}
+                                        size='small'
+                                    >
+                                        Capture
+                                    </Button>
+                                    <span> {wgCaptureImages.length} Images captured</span>
+                                    <br />
+                                    <Webcam
+                                        audio={false}
+                                        ref={wgWebcamRef}
+                                        screenshotFormat="image/jpeg"
+                                        width={640}
+                                        height={360}
+                                    />
+                                    <br/><br/>
 
                                     Files: <Button variant='outlined' onClick={handleWGFileAddClick}>+</Button>
                                     <br/><br/>
@@ -910,15 +1028,18 @@ const Page = () => {
                                 </>
                             </TabPanel>
                             <TabPanel value={2}>
-                                Images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
+                                Images: 
+                                <br/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
                                 <br/><br/>
                                 {mcImageInputs.map((images, i) => (
                                     <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <input ref={mcImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => mcImageInputRefs.current[i]?.current.click()}
                                             size='small'
+                                            sx={{ ml: 8}}
                                         >
                                             Choose Files
                                         </Button>
@@ -933,6 +1054,23 @@ const Page = () => {
                                         <br/><br/>
                                     </>
                                 ))}
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                    variant="outlined"
+                                    onClick={mcCapturePhoto}
+                                    size='small'
+                                >
+                                    Capture
+                                </Button>
+                                <span> {mcCaptureImages.length} Images captured</span>
+                                <br />
+                                <Webcam
+                                    audio={false}
+                                    ref={mcWebcamRef}
+                                    screenshotFormat="image/jpeg"
+                                    width={640}
+                                    height={360}
+                                />
+                                <br/><br/>
 
                                 Files: <Button variant='outlined' onClick={handleMCFileAddClick}>+</Button>
                                 <br/><br/>
