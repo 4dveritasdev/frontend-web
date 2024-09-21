@@ -690,7 +690,7 @@ const Page = () => {
         
         const body = new FormData();
         body.append("file", imageSrc);
-        const res = await uploadFiles(body);
+        const res = await uploadFile(body);
         console.log(res);
 
         let temp = productCaptureImages;
