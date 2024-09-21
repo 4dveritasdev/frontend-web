@@ -685,10 +685,12 @@ const Page = () => {
         const imageSrc = productWebcamRef.current.getScreenshot();
         const response = await fetch(imageSrc);
         const blob = await response.blob();
+        console.log(blob);
         
         const body = new FormData();
-        body.append("files", blob);
+        body.append("files", [blob]);
         const res = await uploadFiles(body);
+        console.log(res);
 
         let temp = productCaptureImages;
         temp.push(res[0]);
@@ -830,7 +832,7 @@ const Page = () => {
                                     Capture
                                 </Button>
                                 <span> {productCaptureImages.length} Images captured</span>
-                                <br />
+                                <br /><br />
                                 <Webcam
                                     audio={false}
                                     ref={productWebcamRef}
