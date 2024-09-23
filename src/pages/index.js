@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, IconButton, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
+import { addProduct, getAddressFromCoordinates, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
@@ -133,8 +133,24 @@ const Page = () => {
     }
 
     const registerHandler = async () => {
-        const res = await registerCompany({name, password});
-        setCompany(res);
+        let location = '';
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    location = await getAddressFromCoordinates(latitude, longitude);
+                    console.log(latitude, longitude, location);
+
+                    const res = await registerCompany({name, password, location});
+                    setCompany(res);
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                }
+            );
+        } else {
+            console.log("Geolocation is not supported by this browser");
+        }
     }
     
     const resetFields = () => {
@@ -165,6 +181,8 @@ const Page = () => {
         setGuaranteePeriod(0);
         setGuaranteeUnit(0);
         setProductCaptureImages([]);
+        setWGCaptureImages([]);
+        setMCCaptureImages([]);
         setManualsAndCerts({
             public: '',
             private: ''

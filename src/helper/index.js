@@ -191,3 +191,16 @@ export const CalculateRemainPeriod = (start, data) => {
     return {duaration, string: res};
 
 }
+
+export const getAddressFromCoordinates = async (lat, lng) => {
+  const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`;
+
+  const res = await fetch(nominatimUrl);
+  const data = await res.json();
+  if (data && data.address) {
+    const { road, city, state, postcode, country } = data.address;
+    const fullAddress = `${city || ''}, ${state || ''}, ${postcode || ''}, ${country || ''}`;
+    return fullAddress;
+  }
+  return '';
+};

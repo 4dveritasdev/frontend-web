@@ -65,7 +65,6 @@ export default function PreviewModal({open, setOpen, productInfo }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [viewPDF, setViewPDF] = useState(false);
     const [currentPDF, setCurrentPDF] = useState(null);
-    console.log(productInfo);
 
     const handleChange = (event, newValue) => {
         console.log(event);
