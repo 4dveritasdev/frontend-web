@@ -840,7 +840,7 @@ const Page = () => {
                                 <br/><br/>
                                 {productImageInputs.map((images, i) => (
                                     <>
-                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => productImageInputRefs.current[i]?.current.click()}
@@ -919,7 +919,7 @@ const Page = () => {
                                     <br/><br/>
                                     {wgImageInputs.map((images, i) => (
                                         <>
-                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                             <Button
                                                 variant="outlined"
                                                 onClick={() => wgImageInputRefs.current[i]?.current.click()}
@@ -1072,7 +1072,7 @@ const Page = () => {
                                 <br/><br/>
                                 {mcImageInputs.map((images, i) => (
                                     <>
-                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => mcImageInputRefs.current[i]?.current.click()}
