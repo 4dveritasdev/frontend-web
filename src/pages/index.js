@@ -80,6 +80,8 @@ const Page = () => {
     const wgWebcamRef = useRef(null);
     const mcWebcamRef = useRef(null);
     const productPhotoRef = useRef([]);
+
+    const [captureStart,setCaptureStart] = useState([false,false,false])
     productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
 
     const [isEditing, setIsEditing] = useState(0);
@@ -695,86 +697,107 @@ const Page = () => {
     };
 
     const productCapturePhoto = async () => {
-        const imageSrc = productWebcamRef.current.getScreenshot();
-        // const response = await fetch(imageSrc);
+        if(!captureStart[0]) {
+            captureStart[0] = true;
+            setCaptureStart([...captureStart])
+        }
+        else {
+            const imageSrc = productWebcamRef.current.getScreenshot();
+            // const response = await fetch(imageSrc);
 
-        // const blob = await response.blob();
-        // console.log(blob);
-        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
-        
-        const body = new FormData();
-        body.append("file", file);
-        const res = await uploadFile(body);
-        console.log(res);
+            // const blob = await response.blob();
+            // console.log(blob);
+            const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
+            
+            const body = new FormData();
+            body.append("file", file);
+            const res = await uploadFile(body);
+            console.log(res);
 
-        let temp = productCaptureImages;
-        temp.push(res);
-        setProductCaptureImages(temp);
+            let temp = productCaptureImages;
+            temp.push(res);
+            setProductCaptureImages(temp);
 
-        let images = [];
-        for (let inputs of productImageInputs) {
-            for (let image of inputs) {
+            let images = [];
+            for (let inputs of productImageInputs) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+
+            for (let image of productCaptureImages) {
                 images.push(image);
             }
+            setProductImages(images);
         }
-
-        for (let image of productCaptureImages) {
-            images.push(image);
-        }
-        setProductImages(images);
+        
     }
     const wgCapturePhoto = async () => {
-        const imageSrc = wgWebcamRef.current.getScreenshot();
-        // const response = await fetch(imageSrc);
-        // const blob = await response.blob();
-        
-        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
-        
-        const body = new FormData();
-        body.append("file", file);
-        const res = await uploadFile(body);
-        console.log(res);
-
-        let temp = wgCaptureImages;
-        temp.push(res);
-        setWGImages(temp);
-
-        let images = [];
-        for (let inputs of wgImageInputs) {
-            for (let image of inputs) {
+        if(!captureStart[1]) {
+            captureStart[1] = true;
+            setCaptureStart([...captureStart])
+        }
+        else {
+            const imageSrc = wgWebcamRef.current.getScreenshot();
+            // const response = await fetch(imageSrc);
+            // const blob = await response.blob();
+            
+            const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
+            
+            const body = new FormData();
+            body.append("file", file);
+            const res = await uploadFile(body);
+            console.log(res);
+    
+            let temp = wgCaptureImages;
+            temp.push(res);
+            setWGImages(temp);
+    
+            let images = [];
+            for (let inputs of wgImageInputs) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+    
+            for (let image of wgCaptureImages) {
                 images.push(image);
             }
+            setWGImages(images);
         }
-
-        for (let image of wgCaptureImages) {
-            images.push(image);
-        }
-        setWGImages(images);
+       
     }
     const mcCapturePhoto = async () => {
-        const imageSrc = mcWebcamRef.current.getScreenshot();
-        const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
-        
-        const body = new FormData();
-        body.append("file", file);
-        const res = await uploadFile(body);
-        console.log(res);
-
-        let temp = mcCaptureImages;
-        temp.push(res);
-        setMCCaptureImages(temp);
-
-        let images = [];
-        for (let inputs of mcImageInputs) {
-            for (let image of inputs) {
+        if(!captureStart[2]) {
+            captureStart[2] = true;
+            setCaptureStart([...captureStart])
+        }
+        else {
+            const imageSrc = mcWebcamRef.current.getScreenshot();
+            const file = base64ToFile(imageSrc, 'webcam-photo.jpg');
+            
+            const body = new FormData();
+            body.append("file", file);
+            const res = await uploadFile(body);
+            console.log(res);
+    
+            let temp = mcCaptureImages;
+            temp.push(res);
+            setMCCaptureImages(temp);
+    
+            let images = [];
+            for (let inputs of mcImageInputs) {
+                for (let image of inputs) {
+                    images.push(image);
+                }
+            }
+    
+            for (let image of mcCaptureImages) {
                 images.push(image);
             }
+            setMCImages(images);
         }
-
-        for (let image of mcCaptureImages) {
-            images.push(image);
-        }
-        setMCImages(images);
+       
     }
 
     return (
@@ -847,17 +870,24 @@ const Page = () => {
                                     onClick={productCapturePhoto}
                                     size='small'
                                 >
-                                    Capture
+                                    {
+                                        !captureStart[0]?'Start Capture':'Capture'
+                                    }
                                 </Button>
                                 <span> {productCaptureImages.length} Images captured</span>
                                 <br /><br />
-                                <Webcam
-                                    audio={false}
-                                    ref={productWebcamRef}
-                                    screenshotFormat="image/jpeg"
-                                    width={640}
-                                    height={360}
-                                />
+                                {
+                                    captureStart[0] && (
+                                        <Webcam
+                                            audio={false}
+                                            ref={productWebcamRef}
+                                            screenshotFormat="image/jpeg"
+                                            width='100%'
+                                            height={360}
+                                        />
+                                    )
+                                }
+                               
                                 <br/><br/>
 
                                 Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
@@ -926,17 +956,22 @@ const Page = () => {
                                         onClick={wgCapturePhoto}
                                         size='small'
                                     >
-                                        Capture
+                                        {!captureStart[1]?'Start Capture':'Capture'}
                                     </Button>
                                     <span> {wgCaptureImages.length} Images captured</span>
                                     <br />
-                                    <Webcam
-                                        audio={false}
-                                        ref={wgWebcamRef}
-                                        screenshotFormat="image/jpeg"
-                                        width={640}
-                                        height={360}
-                                    />
+                                    {
+                                        captureStart[1] && (
+                                            <Webcam
+                                                audio={false}
+                                                ref={wgWebcamRef}
+                                                screenshotFormat="image/jpeg"
+                                                width={640}
+                                                height={360}
+                                            />
+                                        )
+                                    }
+                                    
                                     <br/><br/>
 
                                     Files: <Button variant='outlined' onClick={handleWGFileAddClick}>+</Button>
@@ -1079,17 +1114,22 @@ const Page = () => {
                                     onClick={mcCapturePhoto}
                                     size='small'
                                 >
-                                    Capture
+                                    {captureStart[2]?'Capture':'Start Capture'}
                                 </Button>
                                 <span> {mcCaptureImages.length} Images captured</span>
                                 <br />
-                                <Webcam
-                                    audio={false}
-                                    ref={mcWebcamRef}
-                                    screenshotFormat="image/jpeg"
-                                    width={640}
-                                    height={360}
-                                />
+                                {
+                                    captureStart[2] && (
+                                        <Webcam
+                                            audio={false}
+                                            ref={mcWebcamRef}
+                                            screenshotFormat="image/jpeg"
+                                            width={640}
+                                            height={360}
+                                        />
+                                    )
+                                }
+                                
                                 <br/><br/>
 
                                 Files: <Button variant='outlined' onClick={handleMCFileAddClick}>+</Button>

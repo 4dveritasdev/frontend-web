@@ -95,7 +95,7 @@ export default function PreviewModal({open, setOpen, productInfo }) {
     width: '100%',
     height: 280,
     playerVars: {
-      autoplay: 1,
+      autoplay: 0,
     },
   };
     
