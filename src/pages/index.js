@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, IconButton, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { addProduct, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
+import { addProduct, getAddressFromCoordinates, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
@@ -135,8 +135,24 @@ const Page = () => {
     }
 
     const registerHandler = async () => {
-        const res = await registerCompany({name, password});
-        setCompany(res);
+        let location = '';
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    location = await getAddressFromCoordinates(latitude, longitude);
+                    console.log(latitude, longitude, location);
+
+                    const res = await registerCompany({name, password, location});
+                    setCompany(res);
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                }
+            );
+        } else {
+            console.log("Geolocation is not supported by this browser");
+        }
     }
     
     const resetFields = () => {
@@ -167,6 +183,8 @@ const Page = () => {
         setGuaranteePeriod(0);
         setGuaranteeUnit(0);
         setProductCaptureImages([]);
+        setWGCaptureImages([]);
+        setMCCaptureImages([]);
         setManualsAndCerts({
             public: '',
             private: ''
@@ -845,7 +863,7 @@ const Page = () => {
                                 <br/><br/>
                                 {productImageInputs.map((images, i) => (
                                     <>
-                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => productImageInputRefs.current[i]?.current.click()}
@@ -931,7 +949,7 @@ const Page = () => {
                                     <br/><br/>
                                     {wgImageInputs.map((images, i) => (
                                         <>
-                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                             <Button
                                                 variant="outlined"
                                                 onClick={() => wgImageInputRefs.current[i]?.current.click()}
@@ -1089,7 +1107,7 @@ const Page = () => {
                                 <br/><br/>
                                 {mcImageInputs.map((images, i) => (
                                     <>
-                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
                                         <Button
                                             variant="outlined"
                                             onClick={() => mcImageInputRefs.current[i]?.current.click()}

@@ -8,7 +8,6 @@ const QRCode = ({data}) => {
     
     useEffect(() => {
         (async () => {
-            console.log(data);
             const code = await qrcode.toDataURL('https://4dveritaspublic.com?qrcode=' + data);
             setQRcodeImage(code);
         })()

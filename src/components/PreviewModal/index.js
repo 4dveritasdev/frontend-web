@@ -28,7 +28,7 @@ const style = {
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    textAlign: 'center',
+    textAlign: 'center'
 };
 
 const modalStyle = {
@@ -65,7 +65,6 @@ export default function PreviewModal({open, setOpen, productInfo }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [viewPDF, setViewPDF] = useState(false);
     const [currentPDF, setCurrentPDF] = useState(null);
-    console.log(productInfo);
 
     const handleChange = (event, newValue) => {
         console.log(event);
@@ -107,7 +106,7 @@ export default function PreviewModal({open, setOpen, productInfo }) {
         aria-describedby="modal-modal-description"
         >
         <Box sx={style}>
-            <Box sx={{ position: 'relative', backgroundColor: 'black', color: 'white', minHeight: 750}}>
+            <Box sx={{ position: 'relative', backgroundColor: 'black', color: 'white', height: 750, overflow: 'auto'}}>
             
                 <Modal
                     open={viewPDF}
