@@ -30,6 +30,7 @@ const Page = () => {
     const [productImages, setProductImages] = useState([]);
     const [wgImages, setWGImages] = useState([]);
     const [mcImages, setMCImages] = useState([]);
+    const [serials,setSerials] = useState([])
     const [productImageInputs, setProductImageInputs] = useState([]);
     const [productCaptureImages, setProductCaptureImages] = useState([]);
     const [wgCaptureImages, setWGCaptureImages] = useState([]);
@@ -206,6 +207,7 @@ const Page = () => {
             images:productImages, 
             files: productFiles, 
             videos: productVideos, 
+            serials,
             warrantyAndGuarantee: {
                 images: wgImages,
                 files: wgFiles,
@@ -420,6 +422,13 @@ const Page = () => {
             }
         })()
     }, [page]);
+
+    const handleProductSerial = (event,i,type) => {
+        let result = [...serials]
+        result[i][type] = event.target.value 
+
+        setSerials(result)
+    }
 
     const handleProductImageChange = async (event, i) => {
         event.stopPropagation();
@@ -904,6 +913,20 @@ const Page = () => {
                                             height={360}
                                         />
                                     )
+                                }
+
+                                <br/><br/>
+
+                                <span>Serial Numbers: <Button variant='outlined' onClick={()=>setSerials([{type:'',serial:''},...serials])}>+</Button></span>
+                                <br/>
+                                {
+                                    serials.map((item,i)=>(
+                                        <>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Type" variant="outlined" size='small' value={item.type} onChange={(e) => handleProductSerial(e,i,'type')} /> &nbsp;
+                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Serial" variant="outlined" size='small' value={item.serial} onChange={(e) => handleProductSerial(e,i,'serial')} /> &nbsp;
+                                        <br/><br/>
+                                    </>
+                                    ))
                                 }
                                
                                 <br/><br/>
