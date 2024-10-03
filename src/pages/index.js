@@ -15,6 +15,9 @@ import { useRef } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Webcam from 'react-webcam';
+import { Remove } from '@mui/icons-material';
+
+const serialTypes = [{label:'Serial Number',value:'serial'}]
 
 const Page = () => {
     const [name, setName] = useState('');
@@ -86,6 +89,10 @@ const Page = () => {
     productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
 
     const [isEditing, setIsEditing] = useState(0);
+
+    const canAddSerialNumber = () => {
+        return serialTypes.map(item=>item.value).filter(item=>!serials.map(serial=>serial.type).includes(item))
+    }
 
     useEffect(() => {
         console.log('socket');
@@ -827,6 +834,8 @@ const Page = () => {
        
     }
 
+    const enabled = canAddSerialNumber()
+
     return (
         <Box sx={{ p: 5 }}>
             {!company
@@ -917,15 +926,22 @@ const Page = () => {
 
                                 <br/><br/>
 
-                                <span>Serial Numbers: <Button variant='outlined' onClick={()=>setSerials([{type:'',serial:''},...serials])}>+</Button></span>
+                                <span>Serial Numbers: <Button variant='outlined' onClick={()=>setSerials([{type:enabled[0]},...serials])} disabled={enabled.length == 0}>+</Button></span>
                                 <br/>
                                 {
                                     serials.map((item,i)=>(
-                                        <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Type" variant="outlined" size='small' value={item.type} onChange={(e) => handleProductSerial(e,i,'type')} /> &nbsp;
-                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Serial" variant="outlined" size='small' value={item.serial} onChange={(e) => handleProductSerial(e,i,'serial')} /> &nbsp;
-                                        <br/><br/>
-                                    </>
+                                        <div style={{display:'flex',alignItems:'center',marginTop:20}}>
+                                            <Select key={i * 2} value={item.type} id="outlined-basic" label="Type">
+                                            
+                                                {
+                                                    serialTypes.filter(type=>enabled.includes(type.value)).map(type=>(
+                                                        <MenuItem value={type.value}>{type.label}</MenuItem>
+                                                    ))
+                                                }
+                                            </Select>
+
+                                            <IconButton style={{marginLeft:50}} onClick={()=>setSerials(serials.filter((item,index)=>index !== i))}><DeleteIcon /></IconButton>
+                                    </div>
                                     ))
                                 }
                                
