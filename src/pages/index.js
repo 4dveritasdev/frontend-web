@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, IconButton, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { addProduct, getAddressFromCoordinates, getCompanyProducts, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
+import { addProduct, getAddressFromCoordinates, getCompanyProducts, getProductIdentifiers, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
 import io from 'socket.io-client';
@@ -47,6 +47,7 @@ const Page = () => {
     const [mcFiles, setMCFiles] = useState([]);
     const [mcFileInputs, setMCFileInputs] = useState([]);
     const [warrantyPeriod, setWarrantyPeriod] = useState(0);
+    const [identifiers,setIdentifiers] = useState([])
     const [warrantyUnit, setWarrantyUnit] = useState(0);
     const [guaranteePeriod, setGuaranteePeriod] = useState(0);
     const [guaranteeUnit, setGuaranteeUnit] = useState(0);
@@ -122,6 +123,8 @@ const Page = () => {
                 setTotalAmount(selectedProductData.total_minted_amount);
                 const res = await getProductQRcodes(selectedProduct._id, 1);
                 setQrCodes(res);
+                const identiferRes = await getProductIdentifiers(selectedProduct._id,1);
+                setIdentifiers(identiferRes)
                 setPage(1);
             }
         });
@@ -406,6 +409,8 @@ const Page = () => {
         setTotalAmount(totalAmount1);
         const res = await getProductQRcodes(selectedProduct._id, 1);
         setQrCodes(res);
+        const identiferRes = await getProductIdentifiers(selectedProduct._id,1)
+        setIdentifiers(identiferRes)
         setPage(1);
 
         setIsMinting(false);
@@ -416,6 +421,8 @@ const Page = () => {
             (async () => {
                 const res = await getProductQRcodes(selectedProduct._id, 1);
                 setQrCodes(res);
+                const identiferRes = await getProductIdentifiers(selectedProduct._id,1)
+                setIdentifiers(identiferRes)
                 setPage(1);
             })()
         }
@@ -426,6 +433,8 @@ const Page = () => {
             if(selectedProduct) {
                 const res = await getProductQRcodes(selectedProduct._id, page);
                 setQrCodes(res);
+                const identiferRes = await getProductIdentifiers(selectedProduct._id,1)
+                setIdentifiers(identiferRes)
             }
         })()
     }, [page]);
@@ -934,7 +943,7 @@ const Page = () => {
                                             <Select key={i * 2} value={item.type} id="outlined-basic" label="Type">
                                             
                                                 {
-                                                    serialTypes.filter(type=>enabled.includes(type.value)).map(type=>(
+                                                    serialTypes.filter(type=>enabled.includes(type.value) || type.value == item.type).map(type=>(
                                                         <MenuItem value={type.value}>{type.label}</MenuItem>
                                                     ))
                                                 }
@@ -1302,10 +1311,12 @@ const Page = () => {
                                 Print
                             </Button>
                             <br/>
-                            
+                            <div style={{display:'flex',flexWrap:'wrap'}}>
                             {qrcodes.map((item, index) => (
-                                <QRCode key={index} data={item} />
+                                <QRCode key={index} data={item} identifer={identifiers[index]?identifiers[index]:[]} />
                             ))}
+                            </div>
+                            
                         </Box>
                     </Box>}
                 </>
