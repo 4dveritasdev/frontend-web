@@ -935,7 +935,7 @@ const Page = () => {
 
                                 <br/><br/>
 
-                                <span>Serial Numbers: <Button variant='outlined' onClick={()=>setSerials([{type:enabled[0]},...serials])} disabled={enabled.length == 0}>+</Button></span>
+                                <span>Additional Identifiers: <Button variant='outlined' onClick={()=>setSerials([{type:enabled[0]},...serials])} disabled={enabled.length == 0}>+</Button></span>
                                 <br/>
                                 {
                                     serials.map((item,i)=>(
