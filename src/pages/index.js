@@ -880,7 +880,7 @@ const Page = () => {
                         <Tabs aria-label="Basic tabs" defaultValue={0}>
                             <TabList>
                                 <Tab>DPP</Tab>
-                                <Tab>TimeCapsule</Tab>
+                                <Tab>Time Capsule</Tab>
                                 <Tab>Trade History</Tab>
                             </TabList>
                             <TabPanel value={0}>
