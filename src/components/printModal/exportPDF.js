@@ -34,7 +34,7 @@ const QRCode = ({data,identifer}) => {
             />
             {
                 identifer.map(item=>(
-                    <div>{item.type} : {item.serial}</div>
+                    <Text>{item.type} : {item.serial}</Text>
                 ))
             }
         </div>

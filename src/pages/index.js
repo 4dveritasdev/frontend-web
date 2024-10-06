@@ -880,7 +880,7 @@ const Page = () => {
                         <Tabs aria-label="Basic tabs" defaultValue={0}>
                             <TabList>
                                 <Tab>DPP</Tab>
-                                <Tab>Warranty & Guaranty</Tab>
+                                <Tab>TimeCapsule</Tab>
                                 <Tab>Trade History</Tab>
                             </TabList>
                             <TabPanel value={0}>
@@ -1229,6 +1229,8 @@ const Page = () => {
                                             <br/><br/>
                                         </>
                                     ))}
+
+                                    <h4>Manuals & Certs</h4>
 
                                     Public: <TextField 
                                         placeholder=' - User manuals
