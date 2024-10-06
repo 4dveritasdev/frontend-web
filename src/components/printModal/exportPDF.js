@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const QRCode = ({data}) => {
+const QRCode = ({data,identifer}) => {
 
     const [qrcodeImage, setQRcodeImage] = useState('');
     
@@ -27,22 +27,32 @@ const QRCode = ({data}) => {
     }, [data]);
 
     return (
-        <Image
-            src={`${qrcodeImage}`}
-            style={{ width: "100px", height: "100px"}}
-        />
+        <div style={{maxWidth:'228px'}}>
+            <Image
+                src={`${qrcodeImage}`}
+                style={{ width: "100px", height: "100px"}}
+            />
+            {
+                identifer.map(item=>(
+                    <div>{item.type} : {item.serial}</div>
+                ))
+            }
+        </div>
     );
 }
 
 // Create Document Component
 const MyDocument = ({ product, apply, printMode, count, from, to }) => {
     const [qrcodes, setQrCodes] = useState([]);
+    const [identifiers,setIdentifiers] = useState([])
 
     useEffect(() => {
         // console.log(apply);
         if(apply) {
             (async () => {
                 const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
+                const identiferRes = await getProductIdentifiers(selectedProduct._id,printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to)
+                setIdentifiers(identiferRes)
                 setQrCodes(res);
             })()
         }
@@ -54,7 +64,7 @@ const MyDocument = ({ product, apply, printMode, count, from, to }) => {
             <Page size="A4" style={styles.page}>
                 <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
                     {qrcodes.map((item, index) => (
-                        <QRCode key={index} data={item} />
+                        <QRCode key={index} data={item} identifer={identifiers[index]?identifiers[index]:[]} />
                     ))}
                 </View>
             </Page>

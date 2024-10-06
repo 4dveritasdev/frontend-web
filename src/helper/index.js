@@ -130,6 +130,7 @@ export const getProductQRcodes = async (product_id, page = 0, from = 0, to = 0) 
     }
 }
 
+
 export const getProductIdentifiers = async(product_id, page = 0, from = 0, to = 0) => {
     try {
         const res = await axios.post(`${Backend_URL}qrcode/serials`, { product_id, page, from, to });
