@@ -881,7 +881,7 @@ const Page = () => {
                             <TabList>
                                 <Tab>DPP</Tab>
                                 <Tab>Warranty & Guaranty</Tab>
-                                <Tab>Manuals & Certs</Tab>
+                                <Tab>Trade History</Tab>
                             </TabList>
                             <TabPanel value={0}>
                                 Images: 
@@ -991,6 +991,7 @@ const Page = () => {
                             </TabPanel>
                             <TabPanel value={1}>
                                 <>
+                                    <h4>Warranty & Guaranty</h4>
                                     Images: 
                                     <br/>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
@@ -1146,117 +1147,118 @@ const Page = () => {
                                             setLifetimeGuarantee(!lifetimeGuarantee)
                                         }}/> Lifetime Guarantee
                                     <br/><br/>
+                                    Images: 
+                                    <br/>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
+                                    <br/><br/>
+                                    {mcImageInputs.map((images, i) => (
+                                        <>
+                                            <input ref={mcImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => mcImageInputRefs.current[i]?.current.click()}
+                                                size='small'
+                                                sx={{ ml: 8}}
+                                            >
+                                                Choose Files
+                                            </Button>
+
+                                            <span>
+                                                {mcImageInputs[i]?.length > 0 ? (
+                                                    <> {mcImageInputs[i].length} files</>
+                                                ) : (
+                                                    <> No file chosen</>
+                                                )}
+                                            </span>
+                                            <br/><br/>
+                                        </>
+                                    ))}
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                        variant="outlined"
+                                        onClick={mcCapturePhoto}
+                                        size='small'
+                                    >
+                                        {captureStart[2]?'Capture':'Start Capture'}
+                                    </Button>
+                                    <span> {mcCaptureImages.length} Images captured</span>
+                                    <br />
+                                    {
+                                        captureStart[2] && (
+                                            <Webcam
+                                                audio={false}
+                                                ref={mcWebcamRef}
+                                                screenshotFormat="image/jpeg"
+                                                width={640}
+                                                height={360}
+                                            />
+                                        )
+                                    }
+                                    
+                                    <br/><br/>
+
+                                    Files: <Button variant='outlined' onClick={handleMCFileAddClick}>+</Button>
+                                    <br/><br/>
+                                    {mcFileInputs.map((files, i) => (
+                                        <>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={mcFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleMCFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => mcFileInputRefs.current[i]?.current.click()}
+                                                size='small'
+                                            >
+                                                Choose Files
+                                            </Button>
+
+                                            <span>
+                                                {mcFileInputs[i]?.length > 0 ? (
+                                                    <> {mcFileInputs[i].length} files</>
+                                                ) : (
+                                                    <> No file chosen</>
+                                                )}
+                                            </span>
+                                            <br/><br/>
+                                        </>
+                                    ))}
+
+                                    Youtube Videos: <Button variant='outlined' onClick={handleMCVideoAddClick}>+</Button>
+                                    <br/><br/>
+                                    {mcVideos.map((video, i) => (
+                                        <>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleMCVideoUrlChange(e, i)} /> &nbsp;
+                                            <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleMCVideoDescriptionChange(e, i)} /> &nbsp;
+                                            <br/><br/>
+                                        </>
+                                    ))}
+
+                                    Public: <TextField 
+                                        placeholder=' - User manuals
+                                            - Assembly manuals
+                                            - Product certifications
+                                            - Health warnings
+                                            - Etc.'
+                                        sx={{ width: '80%' }} 
+                                        variant="outlined" 
+                                        multiline 
+                                        rows={5}  
+                                        value={manualsAndCerts.public} 
+                                        onChange={(e) => {setManualsAndCerts({public: e.target.value, private: manualsAndCerts.private})}} 
+                                    />
+                                    <br /><br />
+                                    Private: <TextField 
+                                        placeholder=' - Receipts for the supply chain (could we incorporate a scanner in future, for now, it is only for upload, for MVP
+                                            - Taxation documents
+                                            - Basically anything related to the product, which the customer does not need to see or could impact the strategic advantage of the brand, hence private, so it is available for audit, but not for general consumption. These documents are only visible to people with a higher login authority, which will also be split into multiple roles'
+                                        sx={{ width: '80%' }} 
+                                        variant="outlined" 
+                                        multiline 
+                                        rows={5}  
+                                        value={manualsAndCerts.private} 
+                                        onChange={(e) => {setManualsAndCerts({private: e.target.value, public: manualsAndCerts.public})}} 
+                                    />
                                 </>
                             </TabPanel>
                             <TabPanel value={2}>
-                                Images: 
-                                <br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
-                                <br/><br/>
-                                {mcImageInputs.map((images, i) => (
-                                    <>
-                                        <input ref={mcImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleMCImageChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => mcImageInputRefs.current[i]?.current.click()}
-                                            size='small'
-                                            sx={{ ml: 8}}
-                                        >
-                                            Choose Files
-                                        </Button>
-
-                                        <span>
-                                            {mcImageInputs[i]?.length > 0 ? (
-                                                <> {mcImageInputs[i].length} files</>
-                                            ) : (
-                                                <> No file chosen</>
-                                            )}
-                                        </span>
-                                        <br/><br/>
-                                    </>
-                                ))}
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
-                                    variant="outlined"
-                                    onClick={mcCapturePhoto}
-                                    size='small'
-                                >
-                                    {captureStart[2]?'Capture':'Start Capture'}
-                                </Button>
-                                <span> {mcCaptureImages.length} Images captured</span>
-                                <br />
-                                {
-                                    captureStart[2] && (
-                                        <Webcam
-                                            audio={false}
-                                            ref={mcWebcamRef}
-                                            screenshotFormat="image/jpeg"
-                                            width={640}
-                                            height={360}
-                                        />
-                                    )
-                                }
                                 
-                                <br/><br/>
-
-                                Files: <Button variant='outlined' onClick={handleMCFileAddClick}>+</Button>
-                                <br/><br/>
-                                {mcFileInputs.map((files, i) => (
-                                    <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={mcFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleMCFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => mcFileInputRefs.current[i]?.current.click()}
-                                            size='small'
-                                        >
-                                            Choose Files
-                                        </Button>
-
-                                        <span>
-                                            {mcFileInputs[i]?.length > 0 ? (
-                                                <> {mcFileInputs[i].length} files</>
-                                            ) : (
-                                                <> No file chosen</>
-                                            )}
-                                        </span>
-                                        <br/><br/>
-                                    </>
-                                ))}
-
-                                Youtube Videos: <Button variant='outlined' onClick={handleMCVideoAddClick}>+</Button>
-                                <br/><br/>
-                                {mcVideos.map((video, i) => (
-                                    <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleMCVideoUrlChange(e, i)} /> &nbsp;
-                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleMCVideoDescriptionChange(e, i)} /> &nbsp;
-                                        <br/><br/>
-                                    </>
-                                ))}
-
-                                Public: <TextField 
-                                    placeholder=' - User manuals
-                                        - Assembly manuals
-                                        - Product certifications
-                                        - Health warnings
-                                        - Etc.'
-                                    sx={{ width: '80%' }} 
-                                    variant="outlined" 
-                                    multiline 
-                                    rows={5}  
-                                    value={manualsAndCerts.public} 
-                                    onChange={(e) => {setManualsAndCerts({public: e.target.value, private: manualsAndCerts.private})}} 
-                                />
-                                <br /><br />
-                                Private: <TextField 
-                                    placeholder=' - Receipts for the supply chain (could we incorporate a scanner in future, for now, it is only for upload, for MVP
-                                        - Taxation documents
-                                        - Basically anything related to the product, which the customer does not need to see or could impact the strategic advantage of the brand, hence private, so it is available for audit, but not for general consumption. These documents are only visible to people with a higher login authority, which will also be split into multiple roles'
-                                    sx={{ width: '80%' }} 
-                                    variant="outlined" 
-                                    multiline 
-                                    rows={5}  
-                                    value={manualsAndCerts.private} 
-                                    onChange={(e) => {setManualsAndCerts({private: e.target.value, public: manualsAndCerts.public})}} 
-                                />
                             </TabPanel>
                         </Tabs>
 
