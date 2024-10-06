@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import { getProductQRcodes } from '../../helper';
+import { getProductIdentifiers, getProductQRcodes } from '../../helper';
 import qrcode from 'qrcode';
 
 // Create styles
@@ -51,7 +51,7 @@ const MyDocument = ({ product, apply, printMode, count, from, to }) => {
         if(apply) {
             (async () => {
                 const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
-                const identiferRes = await getProductIdentifiers(selectedProduct._id,printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to)
+                const identiferRes = await getProductIdentifiers(product._id,printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to)
                 setIdentifiers(identiferRes)
                 setQrCodes(res);
             })()
