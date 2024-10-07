@@ -158,71 +158,59 @@ export default function PreviewModal({open, setOpen, productInfo }) {
                 </Box>}
                 
                 {tabValue === 1 && <Box sx={{ position: 'relative' }}>
-                    <Slide transitionDuration={100} autoplay={false} onChange={(previous, next) => { console.log(previous); setCurrentIndex(next) }}>
-                        {productInfo.warrantyAndGuarantee.images.map((slideImage, index) => (
-                            <div key={index}>
-                                <img src={'https://shearnode.com/api/v1/files/' + slideImage} height={280} />
-                            </div>
-                        ))} 
-                        {productInfo.warrantyAndGuarantee.videos.map((video) => (
-                            <YouTube videoId={getYoutubeVideoIDFromUrl(video.url)} opts={opts} />
-                        ))}
-                    </Slide>
+                    {
+                       productInfo.warrantyAndGuarantee.images.length +  productInfo.warrantyAndGuarantee.videos.length + productInfo.manualsAndCerts.images.length + productInfo.manualsAndCerts.videos.length > 0 && (
+                        <>
+                            <Slide transitionDuration={100} autoplay={false} onChange={(previous, next) => { console.log(previous); setCurrentIndex(next) }}>
+                                {productInfo.warrantyAndGuarantee.images.map((slideImage, index) => (
+                                    <div key={index}>
+                                        <img src={'https://shearnode.com/api/v1/files/' + slideImage} height={280} />
+                                    </div>
+                                ))} 
+                                 {productInfo.manualsAndCerts.images.map((slideImage, index) => (
+                                    <div key={index}>
+                                        <img src={'https://shearnode.com/api/v1/files/' + slideImage} height={280} />
+                                    </div>
+                                ))} 
+                                {productInfo.warrantyAndGuarantee.videos.map((video) => (
+                                    <YouTube videoId={getYoutubeVideoIDFromUrl(video.url)} opts={opts} />
+                                ))}
+                               
+                                {productInfo.manualsAndCerts.videos.map((video) => (
+                                    <YouTube videoId={getYoutubeVideoIDFromUrl(video.url)} opts={opts} />
+                                ))}
+                                
+                            </Slide>
 
-                    <Box sx={{ 
-                        position: 'absolute',
-                        bottom: 15,
-                        paddingTop: 1,
-                        paddingBottom: 1,
-                        paddingLeft: 2,
-                        paddingRight: 2,
-                        right: 10,
-                        borderRadius: 20,
-                        backgroundColor: '#444',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        }}>
-                        <img src={currentIndex < productInfo.warrantyAndGuarantee.images.length ?  CameraIcon : YoutubeIcon} style={{height: 20, width: 20}} />
-                        <Typography sx={{color: 'white', fontSize: 13, marginLeft: 1}}>
-                            {currentIndex + 1}/{productInfo.warrantyAndGuarantee.images.length + productInfo.warrantyAndGuarantee.videos.length} Medias
-                        </Typography>
-                    </Box>
+                            <Box sx={{ 
+                                position: 'absolute',
+                                bottom: 15,
+                                paddingTop: 1,
+                                paddingBottom: 1,
+                                paddingLeft: 2,
+                                paddingRight: 2,
+                                right: 10,
+                                borderRadius: 20,
+                                backgroundColor: '#444',
+                                display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                }}>
+                                <img src={currentIndex < productInfo.warrantyAndGuarantee.images.length + productInfo.manualsAndCerts.images.length ?  CameraIcon : YoutubeIcon} style={{height: 20, width: 20}} />
+                                <Typography sx={{color: 'white', fontSize: 13, marginLeft: 1}}>
+                                    {currentIndex + 1}/{productInfo.warrantyAndGuarantee.images.length + productInfo.warrantyAndGuarantee.videos.length + productInfo.manualsAndCerts.images.length + productInfo.manualsAndCerts.videos.length} Medias
+                                </Typography>
+                            </Box>
+
+                        </>
+                       )
+                    }
+                    
                 </Box>}
                 
                 {tabValue === 2 && <Box sx={{ position: 'relative' }}>
-                <Slide transitionDuration={100} autoplay={false} onChange={(previous, next) => { console.log(previous); setCurrentIndex(next) }}>
-                    {productInfo.manualsAndCerts.images.map((slideImage, index) => (
-                        <div key={index}>
-                            <img src={'https://shearnode.com/api/v1/files/' + slideImage} height={280} />
-                        </div>
-                    ))} 
-                    {productInfo.manualsAndCerts.videos.map((video) => (
-                        <YouTube videoId={getYoutubeVideoIDFromUrl(video.url)} opts={opts} />
-                    ))}
-                </Slide>
-
-                <Box sx={{ 
-                    position: 'absolute',
-                    bottom: 15,
-                    paddingTop: 1,
-                    paddingBottom: 1,
-                    paddingLeft: 2,
-                    paddingRight: 2,
-                    right: 10,
-                    borderRadius: 20,
-                    backgroundColor: '#444',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    }}>
-                    <img src={currentIndex < productInfo.manualsAndCerts.images.length ?  CameraIcon : YoutubeIcon} style={{height: 20, width: 20}} />
-                    <Typography sx={{color: 'white', fontSize: 13, marginLeft: 1}}>
-                    {currentIndex + 1}/{productInfo.manualsAndCerts.images.length + productInfo.manualsAndCerts.videos.length} Medias
-                    </Typography>
-                </Box>
+                
                 </Box>}
 
                 <Box sx={{ width: '100%', pt: 3 }}>
@@ -233,8 +221,8 @@ export default function PreviewModal({open, setOpen, productInfo }) {
                             aria-label="basic tabs example"
                         >
                             <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC' }} label="DPP" {...a11yProps(0)} />
-                            <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="W & G" {...a11yProps(1)} />
-                            <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Manuals & Certs" {...a11yProps(2)} />
+                            <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Time Capsule" {...a11yProps(1)} />
+                            <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Trade History" {...a11yProps(2)} />
                         </Tabs>
                     </Box>
                     <CustomTabPanel value={tabValue} index={0}>
@@ -316,19 +304,8 @@ export default function PreviewModal({open, setOpen, productInfo }) {
                                 </Button>
                             ))}
                             </Box>
-                        </Box>
-                    </CustomTabPanel>
-                    <CustomTabPanel value={tabValue} index={2}>
-                        <Box sx={{
-                            backgroundColor: 'white',
-                            color: 'black',
-                            p: 2,
-                            m: 1,
-                            mt: 0,
-                            borderRadius: 5,
-                            textAlign: 'left'
-                        }}>
-                        
+
+                            <h4>Manual & Certs</h4>
                             <Typography style={{ fontSize: 15, fontWeight: 'bold' }}>
                                 Public
                             </Typography>
@@ -352,6 +329,20 @@ export default function PreviewModal({open, setOpen, productInfo }) {
                                 </Button>
                                 ))}
                             </Box>
+                        </Box>
+                    </CustomTabPanel>
+                    <CustomTabPanel value={tabValue} index={2}>
+                        <Box sx={{
+                            backgroundColor: 'white',
+                            color: 'black',
+                            p: 2,
+                            m: 1,
+                            mt: 0,
+                            borderRadius: 5,
+                            textAlign: 'left'
+                        }}>
+                        
+                            
                         </Box>
                     </CustomTabPanel>
                 </Box>

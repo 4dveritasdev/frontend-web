@@ -27,17 +27,21 @@ const QRCode = ({data,identifer}) => {
     }, [data]);
 
     return (
-        <div style={{maxWidth:'228px'}}>
+        <View style={{maxWidth:'228px'}}>
             <Image
                 src={`${qrcodeImage}`}
                 style={{ width: "100px", height: "100px"}}
             />
+            <View>
             {
                 identifer.map(item=>(
-                    <Text>{item.type} : {item.serial}</Text>
+                    <View>
+                        <Text style={{fontSize:12,color:'black'}}>{item.type} : {item.serial}</Text>
+                    </View>
                 ))
             }
-        </div>
+            </View>
+        </View>
     );
 }
 
@@ -51,7 +55,7 @@ const MyDocument = ({ product, apply, printMode, count, from, to }) => {
         if(apply) {
             (async () => {
                 const res = await getProductQRcodes(product._id, 0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to);
-                const identiferRes = await getProductIdentifiers(product._id,printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to)
+                const identiferRes = await getProductIdentifiers(product._id,0, printMode === 'print' ? product.printed_amount + 1 : from, printMode === 'print' ? product.printed_amount + Number(count) : to)
                 setIdentifiers(identiferRes)
                 setQrCodes(res);
             })()
@@ -62,6 +66,7 @@ const MyDocument = ({ product, apply, printMode, count, from, to }) => {
     return (
         <Document>
             <Page size="A4" style={styles.page}>
+                
                 <View style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
                     {qrcodes.map((item, index) => (
                         <QRCode key={index} data={item} identifer={identifiers[index]?identifiers[index]:[]} />

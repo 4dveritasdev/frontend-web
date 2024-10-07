@@ -1147,6 +1147,7 @@ const Page = () => {
                                             setLifetimeGuarantee(!lifetimeGuarantee)
                                         }}/> Lifetime Guarantee
                                     <br/><br/>
+                                    <h4>Manuals & Certs</h4>
                                     Images: 
                                     <br/>
                                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleMCImageAddClick}>+</Button>
@@ -1230,7 +1231,7 @@ const Page = () => {
                                         </>
                                     ))}
 
-                                    <h4>Manuals & Certs</h4>
+                                    
 
                                     Public: <TextField 
                                         placeholder=' - User manuals
