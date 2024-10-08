@@ -27,18 +27,31 @@ const QRCode = ({data,identifer}) => {
     }, [data]);
 
     return (
-        <View style={{maxWidth:'228px'}}>
+        <View style={{maxWidth:'100px'}}>
             <Image
                 src={`${qrcodeImage}`}
                 style={{ width: "100px", height: "100px"}}
             />
             <View>
             {
-                identifer.map(item=>(
+                identifer.map(item=>{
+                const identiferInfo = `${item.type} : ${item.serial}`;
+                const identiferItems = [];
+                
+                for(let i = 0; i < Math.round(identiferInfo.length / 15); i ++) {
+                    identiferItems.push(identiferInfo.substr(i * 15,15))
+                }
+
+                return (
                     <View>
-                        <Text style={{fontSize:12,color:'black'}}>{item.type} : {item.serial}</Text>
+                        {
+                            identiferItems.map(info=>(
+                                <Text style={{fontSize:12,color:'black'}}>{info}</Text>
+                            ))
+                        }
+                        
                     </View>
-                ))
+                )})
             }
             </View>
         </View>
