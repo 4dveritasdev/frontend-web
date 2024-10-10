@@ -879,9 +879,9 @@ const Page = () => {
 
                         <Tabs aria-label="Basic tabs" defaultValue={0}>
                             <TabList>
-                                <Tab>DPP</Tab>
+                                <Tab>4D Veritas</Tab>
                                 <Tab>Time Capsule</Tab>
-                                <Tab>Trade History</Tab>
+                                {/* <Tab>Trade History</Tab> */}
                             </TabList>
                             <TabPanel value={0}>
                                 Images: 
@@ -1260,9 +1260,9 @@ const Page = () => {
                                     />
                                 </>
                             </TabPanel>
-                            <TabPanel value={2}>
+                            {/* <TabPanel value={2}>
                                 
-                            </TabPanel>
+                            </TabPanel> */}
                         </Tabs>
 
                         <Button variant='outlined' onClick={() => {setOpenPreviewModal(true)}} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Preview</Button>

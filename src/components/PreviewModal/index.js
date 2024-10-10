@@ -222,7 +222,7 @@ export default function PreviewModal({open, setOpen, productInfo }) {
                         >
                             <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC' }} label="DPP" {...a11yProps(0)} />
                             <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Time Capsule" {...a11yProps(1)} />
-                            <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Trade History" {...a11yProps(2)} />
+                            {/* <Tab sx={{ fontSize: 13, fontWeight: 'bold', minWidth: 48, color: '#CCC'}} label="Trade History" {...a11yProps(2)} /> */}
                         </Tabs>
                     </Box>
                     <CustomTabPanel value={tabValue} index={0}>
