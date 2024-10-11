@@ -22,6 +22,8 @@ const serialTypes = [{label:'Serial Number',value:'serial'}]
 const Page = () => {
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
+    const [isregister,setIsRegister] = useState(false)
+    const [email,setEmail] = useState('')
     const [company, setCompany] = useState(null);
     const [products, setProducts] = useState([]);
     const [productName, setProductName] = useState('');
@@ -154,7 +156,7 @@ const Page = () => {
                     location = await getAddressFromCoordinates(latitude, longitude);
                     console.log(latitude, longitude, location);
 
-                    const res = await registerCompany({name, password, location});
+                    const res = await registerCompany({name, password,email, location});
                     setCompany(res);
                 },
                 (error) => {
@@ -850,12 +852,30 @@ const Page = () => {
             {!company
                 ? <Box sx={{ p: 2 }}>
                         <br/><br/>
-                        <TextField id="outlined-basic" label="name" variant="outlined" size='small' value={name} onChange={(e) => setName(e.target.value)}/>
-                        <br/><br/>
-                        <TextField id="outlined-basic" type='password' label="password" variant="outlined" size='small' value={password} onChange={(e) => setPassword(e.target.value)}/>
-                        <br/><br/>
-                        <Button variant='outlined' onClick={loginHanlder}>Login</Button> &nbsp;
-                        <Button variant='outlined' onClick={registerHandler}>Register</Button>
+                        {
+                            isregister?(
+                                <form onSubmit={e=>{e.preventDefault(); registerHandler()}}>
+                                <TextField id="outlined-basic" label="name" variant="outlined" size='small' value={name} onChange={(e) => setName(e.target.value)} required/>
+                                <br/><br/>
+                                <TextField id="outlined-basic" label="Email" variant="outlined" type="email" size='small' value={email} onChange={(e) => setEmail(e.target.value)} required/>
+                                <br/><br/>
+                                <TextField id="outlined-basic" type='password' label="password" variant="outlined" size='small' value={password} onChange={(e) => setPassword(e.target.value)} required/>
+                                <br/><br/>
+                                <Button type="submit" variant='outlined'>Sign Up</Button> &nbsp;
+                                <Button variant="outlined" onClick={()=>setIsRegister(false)}>Login</Button>
+                                </form>
+                            ):(
+                                <form onSubmit={e=>{e.preventDefault(); loginHanlder()}}>
+                                <TextField id="outlined-basic" label="name" variant="outlined" size='small' value={name} onChange={(e) => setName(e.target.value)} required/>
+                                <br/><br/>
+                                <TextField id="outlined-basic" type='password' label="password" variant="outlined" size='small' value={password} onChange={(e) => setPassword(e.target.value)} required/>
+                                <br/><br/>
+                                <Button type="submit" variant='outlined'>Login</Button> &nbsp;
+                                <Button variant="outlined" onClick={()=>setIsRegister(true)}>Sign Up</Button>
+                                </form>
+                            )
+                        }
+                       
                 </Box>
                 : <>
                     <Box sx={{ pb: 2 }}>
