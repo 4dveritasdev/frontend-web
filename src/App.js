@@ -1,10 +1,14 @@
 import './App.css';
 import Page from './pages';
+import {StyledEngineProvider} from '@mui/material/styles'
 
 function App() {
   return (
     <div className="App">
-      <Page />
+      <StyledEngineProvider injectFirst>
+        <Page />
+      </StyledEngineProvider>
+      
     </div>
   );
 }

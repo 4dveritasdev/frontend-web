@@ -162,6 +162,26 @@ export const uploadFiles = async (body) => {
     }
 }
 
+export const getAllCompanies = async() => {
+    try {
+        const res = await axios.get(`${Backend_URL}/company`)
+        return res.data.data.data
+    }
+    catch(err) {
+        return []
+    }
+}
+
+export const verifyCompany = async(id) => {
+    try {
+        const res = await axios.get(`${Backend_URL}/company/verify/${id}`)
+        return res.data
+    }
+    catch(err) {
+        return []
+    }
+}
+
 
 export const CalculateRemainPeriod = (start, data) => {
     const {period, unit} = data;

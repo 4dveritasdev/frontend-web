@@ -1,5 +1,5 @@
 import { Box, Button, Checkbox, IconButton, ImageList, ImageListItem, Input, MenuItem, Select, Table, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { addProduct, getAddressFromCoordinates, getCompanyProducts, getProductIdentifiers, getProductQRcodes, getSelectedProductData, login, productMint, registerCompany, removeProduct, updateProduct, uploadFile, uploadFiles } from '../helper';
 import { DataGrid } from '@mui/x-data-grid';
 import QRCode from '../components/displayQRCode';
@@ -16,6 +16,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Webcam from 'react-webcam';
 import { Remove } from '@mui/icons-material';
+import {TreeItem,SimpleTreeView} from '@mui/x-tree-view'
+import Admin from '../components/admin'
 
 const serialTypes = [{label:'Serial Number',value:'serial'}]
 
@@ -67,6 +69,7 @@ const Page = () => {
     const [updates, setUpdates] = useState(0);
     const [totalAmount, setTotalAmount] = useState(0);
     const [page, setPage] = useState(1);
+    const [isAdmin,setIsAdmin] = useState(false)
 
     const [isMinting, setIsMinting] = useState(false);
     const [startAmount, setStartAmount] = useState(0);
@@ -87,6 +90,7 @@ const Page = () => {
     const wgWebcamRef = useRef(null);
     const mcWebcamRef = useRef(null);
     const productPhotoRef = useRef([]);
+    const [parentProduct,setParentProduct] = useState(null)
 
     const [captureStart,setCaptureStart] = useState([false,false,false])
     productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
@@ -202,9 +206,13 @@ const Page = () => {
             public: '',
             private: ''
         });
+        setParentProduct(null)
         setIsEditing(0);
         setUpdates(0);
     }
+
+
+   
 
     const addProductHandler = async () => {
         if (productName == '' || productDetail == '' || productImages.length == 0) {
@@ -242,7 +250,8 @@ const Page = () => {
                 files: mcFiles,
                 videos: mcVideos,
                 ...manualsAndCerts
-            }
+            },
+            parent:parentProduct
         });
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
@@ -289,7 +298,8 @@ const Page = () => {
                 files: mcFiles,
                 videos: mcVideos,
                 ...manualsAndCerts
-            }
+            },
+            parent:parentProduct
         });
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
@@ -312,6 +322,16 @@ const Page = () => {
             })()
         }
     }, [company]);
+
+    // const getProductsHieraches = (productInfo) => {
+    //     let result = [];
+    //     result.push(productInfo)
+    //     const parentInfo = products.find(product=>product._id == productInfo.parent)
+    //     result = [...result,...products.filter(product=>product.parent == parentInfo)]
+    //     if(parentInfo) {
+
+    //     }
+    // }
 
     const productColumns = [
         { field: 'id', headerName: '#', width: 50 },
@@ -380,6 +400,7 @@ const Page = () => {
             public: products[id].manualsAndCerts.public,
             private: products[id].manualsAndCerts.private
         });
+        setParentProduct(products[id].parent)
     }
     
     const deleteProductHandler = async (id) => {
@@ -777,6 +798,35 @@ const Page = () => {
         }
         
     }
+
+    const childrenProducts = useMemo(()=>{
+        if(!!selectedProduct) {
+            return products.filter(product=>product.parent === selectedProduct._id)
+        }
+
+        return []
+        
+    },[selectedProduct,products])
+
+    const disabledProducts = useMemo(()=>{
+        function getChildrenProducts(id) {
+            let result =  products.filter(item=>item.parent == id).map(item=>item._id)
+            let productResult = [...result]
+            for(const item of productResult) {
+                result = [...result,...getChildrenProducts(item)]
+            }
+
+            return result;
+        }
+
+        if(isEditing) {
+            return getChildrenProducts(isEditing)
+        }
+        else {
+            return []
+        }
+
+    },[isEditing,products])
     const wgCapturePhoto = async () => {
         if(!captureStart[1]) {
             captureStart[1] = true;
@@ -845,7 +895,62 @@ const Page = () => {
        
     }
 
+
+    // function CustomTreeItem(props) {
+    //     const { itemId, label, onEdit, onDelete, ...other } = props;
+      
+    //     return (
+    //       <TreeItem
+    //         itemId={itemId}
+    //         label={
+    //           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    //             <span>{label}</span>
+    //             <Box sx={{ marginLeft: 'auto' }}>
+    //               <IconButton size="small" onClick={() => onEdit(nodeId)}>
+    //                 <EditIcon fontSize="small" />
+    //               </IconButton>
+    //               <IconButton size="small" onClick={() => onDelete(nodeId)}>
+    //                 <DeleteIcon fontSize="small" />
+    //               </IconButton>
+    //             </Box>
+    //           </Box>
+    //         }
+    //         {...other}
+    //       />
+    //     );
+    //   }
+
+    const renderChildren = (productInfo) => {
+        const childrenItems = products.filter(product=>product.parent === productInfo._id)
+        if(childrenItems.length > 0) {
+            return (
+                <>
+                    {
+                        childrenItems.map(item=>(
+                            <TreeItem itemId={item._id} label={<Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <span>{item.name}</span>
+                            <Box sx={{ marginLeft: 'auto' }}>
+                              <IconButton size="small" onClick={() => editProductHandler(products.findIndex(product=>product._id === item._id))}>
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton size="small" onClick={() => deleteProductHandler(products.findIndex(product=>product._id === item._id))}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Box>}>
+                                {renderChildren(item)}
+                            </TreeItem>
+                        ))
+                    }
+                </>
+            )
+        }
+        
+        return null;
+    }
+
     const enabled = canAddSerialNumber()
+    
 
     return (
         <Box sx={{ p: 5 }}>
@@ -887,227 +992,245 @@ const Page = () => {
                             loading="lazy"
                         />
                     </Box>
-                    <Box sx={{ pb: 2, pt: 5 }}>
-                        Products
-                        <br/><br/>
-                        <TextField id="outlined-basic" label="Brand Name" variant="outlined" size='small' value={productName} onChange={(e) => setProductName(e.target.value)} multiline/> &nbsp;
-                        <br/><br/>
-                        <TextField id="outlined-basic" label="Model Designation" variant="outlined" size='small' value={productModel} onChange={(e) => setProductModel(e.target.value)} multiline/> &nbsp;
-                        <br/><br/>
-                        <TextField id="outlined-basic" label="Details" variant="outlined" size='small' value={productDetail} onChange={(e) => setProductDetail(e.target.value)} multiline/> &nbsp;
-                        <br/><br/>
+                    {
+                        company.name === 'admin'?(
+                            <Admin />
+                        ):(
+                            <>
+                                <Box sx={{ pb: 2, pt: 5 }}>
+                                    Products
+                                    <br/><br/>
+                                    <TextField id="outlined-basic" label="Brand Name" variant="outlined" size='small' value={productName} onChange={(e) => setProductName(e.target.value)} multiline/> &nbsp;
+                                    <br/><br/>
+                                    <TextField id="outlined-basic" label="Model Designation" variant="outlined" size='small' value={productModel} onChange={(e) => setProductModel(e.target.value)} multiline/> &nbsp;
+                                    <br/><br/>
+                                    <TextField id="outlined-basic" label="Details" variant="outlined" size='small' value={productDetail} onChange={(e) => setProductDetail(e.target.value)} multiline/> &nbsp;
+                                    <br/><br/>
 
-                        <Tabs aria-label="Basic tabs" defaultValue={0}>
-                            <TabList>
-                                <Tab>4D Veritas</Tab>
-                                <Tab>Time Capsule</Tab>
-                                {/* <Tab>Trade History</Tab> */}
-                            </TabList>
-                            <TabPanel value={0}>
-                                Images: 
-                                <br/>
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
-                                <br/><br/>
-                                {productImageInputs.map((images, i) => (
-                                    <>
-                                        <input ref={productImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => productImageInputRefs.current[i]?.current.click()}
-                                            size='small'
-                                            sx={{ ml: 8}}
-                                        >
-                                            Choose Files
-                                        </Button>
+                                    <Tabs aria-label="Basic tabs" defaultValue={0}>
+                                        <TabList>
+                                            <Tab>4D Veritas</Tab>
+                                            <Tab>Time Capsule</Tab>
+                                            {/* <Tab>Trade History</Tab> */}
+                                        </TabList>
+                                        <TabPanel value={0}>
+                                            Images: 
+                                            <br/>
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleProductImageAddClick}>+</Button>
+                                            <br/><br/>
+                                            {productImageInputs.map((images, i) => (
+                                                <>
+                                                    <input ref={productImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleProductImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                                    <Button
+                                                        variant="outlined"
+                                                        onClick={() => productImageInputRefs.current[i]?.current.click()}
+                                                        size='small'
+                                                        sx={{ ml: 8}}
+                                                    >
+                                                        Choose Files
+                                                    </Button>
 
-                                        <span>
-                                            {productImageInputs[i]?.length > 0 ? (
-                                                <> {productImageInputs[i].length} files</>
-                                            ) : (
-                                                <> No file chosen</>
-                                            )}
-                                        </span>
-                                        <br/><br/>
-                                    </>
-                                ))}
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
-                                    variant="outlined"
-                                    onClick={productCapturePhoto}
-                                    size='small'
-                                >
-                                    {
-                                        !captureStart[0]?'Start Capture':'Capture'
-                                    }
-                                </Button>
-                                <span> {productCaptureImages.length} Images captured</span>
-                                <br /><br />
-                                {
-                                    captureStart[0] && (
-                                        <Webcam
-                                            audio={false}
-                                            ref={productWebcamRef}
-                                            screenshotFormat="image/jpeg"
-                                            width='100%'
-                                            height={360}
-                                        />
-                                    )
-                                }
-
-                                <br/><br/>
-
-                                <span>Additional Identifiers: <Button variant='outlined' onClick={()=>setSerials([{type:enabled[0]},...serials])} disabled={enabled.length == 0}>+</Button></span>
-                                <br/>
-                                {
-                                    serials.map((item,i)=>(
-                                        <div style={{display:'flex',alignItems:'center',marginTop:20}}>
-                                            <Select key={i * 2} value={item.type} id="outlined-basic" label="Type">
-                                            
+                                                    <span>
+                                                        {productImageInputs[i]?.length > 0 ? (
+                                                            <> {productImageInputs[i].length} files</>
+                                                        ) : (
+                                                            <> No file chosen</>
+                                                        )}
+                                                    </span>
+                                                    <br/><br/>
+                                                </>
+                                            ))}
+                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                                variant="outlined"
+                                                onClick={productCapturePhoto}
+                                                size='small'
+                                            >
                                                 {
-                                                    serialTypes.filter(type=>enabled.includes(type.value) || type.value == item.type).map(type=>(
-                                                        <MenuItem value={type.value}>{type.label}</MenuItem>
+                                                    !captureStart[0]?'Start Capture':'Capture'
+                                                }
+                                            </Button>
+                                            <span> {productCaptureImages.length} Images captured</span>
+                                            <br /><br />
+                                            {
+                                                captureStart[0] && (
+                                                    <Webcam
+                                                        audio={false}
+                                                        ref={productWebcamRef}
+                                                        screenshotFormat="image/jpeg"
+                                                        width='100%'
+                                                        height={360}
+                                                    />
+                                                )
+                                            }
+
+                                            <br/><br/>
+
+                                            <span>Additional Identifiers: <Button variant='outlined' onClick={()=>setSerials([{type:enabled[0]},...serials])} disabled={enabled.length == 0}>+</Button></span>
+                                            <br/>
+                                            {
+                                                serials.map((item,i)=>(
+                                                    <div style={{display:'flex',alignItems:'center',marginTop:20}}>
+                                                        <Select key={i * 2} value={item.type} id="outlined-basic" label="Type">
+                                                        
+                                                            {
+                                                                serialTypes.filter(type=>enabled.includes(type.value) || type.value == item.type).map(type=>(
+                                                                    <MenuItem value={type.value}>{type.label}</MenuItem>
+                                                                ))
+                                                            }
+                                                        </Select>
+
+                                                        <IconButton style={{marginLeft:50}} onClick={()=>setSerials(serials.filter((item,index)=>index !== i))}><DeleteIcon /></IconButton>
+                                                </div>
+                                                ))
+                                            }
+                                        
+                                            <br/><br/>
+
+                                            Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
+                                            <br/><br/>
+                                            {productFileInputs.map((files, i) => (
+                                                <>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={productFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleProductFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                                    <Button
+                                                        variant="outlined"
+                                                        onClick={() => productFileInputRefs.current[i]?.current.click()}
+                                                        size='small'
+                                                    >
+                                                        Choose Files
+                                                    </Button>
+
+                                                    <span>
+                                                        {productFileInputs[i]?.length > 0 ? (
+                                                            <> {productFileInputs[i].length} files</>
+                                                        ) : (
+                                                            <> No file chosen</>
+                                                        )}
+                                                    </span>
+                                                    <br/><br/>
+                                                </>
+                                            ))}
+                                            Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
+                                            <br/><br/>
+                                            {productVideos.map((video, i) => (
+                                                <>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
+                                                    <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleProductVideoDescriptionChange(e, i)} /> &nbsp;
+                                                    <br/><br/>
+                                                </>
+                                            ))}
+                                            <br/><br/>
+                                            Parent Product
+                                            <br/>
+                                            <Select label="Parent Product" value={parentProduct??''} displayEmpty onChange={item=>setParentProduct(item.target.value)}>
+                                                <MenuItem value="">No Parent</MenuItem>
+                                                {
+                                                    products.filter(product=>!disabledProducts.includes(product._id)).map(product=>(
+                                                        <MenuItem value={product._id}>{product.name}</MenuItem>
                                                     ))
                                                 }
                                             </Select>
+                                            <br/> <br/>
+                                            
+                                        </TabPanel>
+                                        <TabPanel value={1}>
+                                            <>
+                                                <h4>Warranty & Guaranty</h4>
+                                                Images: 
+                                                <br/>
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
+                                                <br/><br/>
+                                                {wgImageInputs.map((images, i) => (
+                                                    <>
+                                                        <input ref={wgImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                                        <Button
+                                                            variant="outlined"
+                                                            onClick={() => wgImageInputRefs.current[i]?.current.click()}
+                                                            size='small'
+                                                            sx={{ ml: 8}}
+                                                        >
+                                                            Choose Files
+                                                        </Button>
 
-                                            <IconButton style={{marginLeft:50}} onClick={()=>setSerials(serials.filter((item,index)=>index !== i))}><DeleteIcon /></IconButton>
-                                    </div>
-                                    ))
-                                }
-                               
-                                <br/><br/>
+                                                        <span>
+                                                            {wgImageInputs[i]?.length > 0 ? (
+                                                                <> {wgImageInputs[i].length} files</>
+                                                            ) : (
+                                                                <> No file chosen</>
+                                                            )}
+                                                        </span>
+                                                        <br/><br/>
+                                                    </>
+                                                ))}
+                                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
+                                                    variant="outlined"
+                                                    onClick={wgCapturePhoto}
+                                                    size='small'
+                                                >
+                                                    {!captureStart[1]?'Start Capture':'Capture'}
+                                                </Button>
+                                                <span> {wgCaptureImages.length} Images captured</span>
+                                                <br />
+                                                {
+                                                    captureStart[1] && (
+                                                        <Webcam
+                                                            audio={false}
+                                                            ref={wgWebcamRef}
+                                                            screenshotFormat="image/jpeg"
+                                                            width={640}
+                                                            height={360}
+                                                        />
+                                                    )
+                                                }
+                                                
+                                                <br/><br/>
 
-                                Files: <Button variant='outlined' onClick={handleProductFileAddClick}>+</Button>
-                                <br/><br/>
-                                {productFileInputs.map((files, i) => (
-                                    <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={productFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleProductFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => productFileInputRefs.current[i]?.current.click()}
-                                            size='small'
-                                        >
-                                            Choose Files
-                                        </Button>
+                                                Files: <Button variant='outlined' onClick={handleWGFileAddClick}>+</Button>
+                                                <br/><br/>
+                                                {wgFileInputs.map((files, i) => (
+                                                    <>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={wgFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleWGFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
+                                                        <Button
+                                                            variant="outlined"
+                                                            onClick={() => wgFileInputRefs.current[i]?.current.click()}
+                                                            size='small'
+                                                        >
+                                                            Choose Files
+                                                        </Button>
 
-                                        <span>
-                                            {productFileInputs[i]?.length > 0 ? (
-                                                <> {productFileInputs[i].length} files</>
-                                            ) : (
-                                                <> No file chosen</>
-                                            )}
-                                        </span>
-                                        <br/><br/>
-                                    </>
-                                ))}
-                                Youtube Videos: <Button variant='outlined' onClick={handleProductVideoAddClick}>+</Button>
-                                <br/><br/>
-                                {productVideos.map((video, i) => (
-                                    <>
-                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleProductVideoUrlChange(e, i)} /> &nbsp;
-                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleProductVideoDescriptionChange(e, i)} /> &nbsp;
-                                        <br/><br/>
-                                    </>
-                                ))}
-                            </TabPanel>
-                            <TabPanel value={1}>
-                                <>
-                                    <h4>Warranty & Guaranty</h4>
-                                    Images: 
-                                    <br/>
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select images: <Button variant='outlined' onClick={handleWGImageAddClick}>+</Button>
-                                    <br/><br/>
-                                    {wgImageInputs.map((images, i) => (
-                                        <>
-                                            <input ref={wgImageInputRefs.current[i]} key={i} type='file' accept="image/*" onChange={(e) => {handleWGImageChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                            <Button
-                                                variant="outlined"
-                                                onClick={() => wgImageInputRefs.current[i]?.current.click()}
-                                                size='small'
-                                                sx={{ ml: 8}}
-                                            >
-                                                Choose Files
-                                            </Button>
+                                                        <span>
+                                                            {wgFileInputs[i]?.length > 0 ? (
+                                                                <> {wgFileInputs[i].length} files</>
+                                                            ) : (
+                                                                <> No file chosen</>
+                                                            )}
+                                                        </span>
+                                                        <br/><br/>
+                                                    </>
+                                                ))}
 
-                                            <span>
-                                                {wgImageInputs[i]?.length > 0 ? (
-                                                    <> {wgImageInputs[i].length} files</>
-                                                ) : (
-                                                    <> No file chosen</>
-                                                )}
-                                            </span>
-                                            <br/><br/>
-                                        </>
-                                    ))}
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Capture images: <Button
-                                        variant="outlined"
-                                        onClick={wgCapturePhoto}
-                                        size='small'
-                                    >
-                                        {!captureStart[1]?'Start Capture':'Capture'}
-                                    </Button>
-                                    <span> {wgCaptureImages.length} Images captured</span>
-                                    <br />
-                                    {
-                                        captureStart[1] && (
-                                            <Webcam
-                                                audio={false}
-                                                ref={wgWebcamRef}
-                                                screenshotFormat="image/jpeg"
-                                                width={640}
-                                                height={360}
-                                            />
-                                        )
-                                    }
-                                    
-                                    <br/><br/>
+                                                Youtube Videos: <Button variant='outlined' onClick={handleWGVideoAddClick}>+</Button>
+                                                <br/><br/>
+                                                {wgVideos.map((video, i) => (
+                                                    <>
+                                                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleWGVideoUrlChange(e, i)} /> &nbsp;
+                                                        <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleWGVideoDescriptionChange(e, i)} /> &nbsp;
+                                                        <br/><br/>
+                                                    </>
+                                                ))}
 
-                                    Files: <Button variant='outlined' onClick={handleWGFileAddClick}>+</Button>
-                                    <br/><br/>
-                                    {wgFileInputs.map((files, i) => (
-                                        <>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Select files: <input ref={wgFileInputRefs.current[i]} key={i} type='file' accept='.pdf' onChange={(e) => {handleWGFilesChange(e, i)}} multiple style={{ display: 'none' }}/>
-                                            <Button
-                                                variant="outlined"
-                                                onClick={() => wgFileInputRefs.current[i]?.current.click()}
-                                                size='small'
-                                            >
-                                                Choose Files
-                                            </Button>
-
-                                            <span>
-                                                {wgFileInputs[i]?.length > 0 ? (
-                                                    <> {wgFileInputs[i].length} files</>
-                                                ) : (
-                                                    <> No file chosen</>
-                                                )}
-                                            </span>
-                                            <br/><br/>
-                                        </>
-                                    ))}
-
-                                    Youtube Videos: <Button variant='outlined' onClick={handleWGVideoAddClick}>+</Button>
-                                    <br/><br/>
-                                    {wgVideos.map((video, i) => (
-                                        <>
-                                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TextField key={i * 2} id="outlined-basic" label="Url..." variant="outlined" size='small' value={video.url} onChange={(e) => handleWGVideoUrlChange(e, i)} /> &nbsp;
-                                            <TextField key={i * 2 + 1} id="outlined-basic" label="Description" variant="outlined" size='small' value={video.description} onChange={(e) => handleWGVideoDescriptionChange(e, i)} /> &nbsp;
-                                            <br/><br/>
-                                        </>
-                                    ))}
-
-                                    Warranty: &nbsp;&nbsp;
-                                    <TextField 
-                                        type='number' 
-                                        variant="outlined" 
-                                        label="Period" 
-                                        size='small' 
-                                        sx={{ width: 80}}
-                                        value={warrantyPeriod} 
-                                        onChange={(e) => {setWarrantyPeriod(e.target.value)}} 
-                                        disabled={noWarranty | lifetimeWarranty}
-                                    /> &nbsp;
-                                    <Select
-                                        value={warrantyUnit} 
+                                                Warranty: &nbsp;&nbsp;
+                                                <TextField 
+                                                    type='number' 
+                                                    variant="outlined" 
+                                                    label="Period" 
+                                                    size='small' 
+                                                    sx={{ width: 80}}
+                                                    value={warrantyPeriod} 
+                                                    onChange={(e) => {setWarrantyPeriod(e.target.value)}} 
+                                                    disabled={noWarranty | lifetimeWarranty}
+                                                /> &nbsp;
+                                                <Select
+                                                    value={warrantyUnit} 
                                         onChange={(e) => {setWarrantyUnit(e.target.value)}} 
                                         size='small'
                                         disabled={noWarranty | lifetimeWarranty}
@@ -1291,19 +1414,34 @@ const Page = () => {
                             ? <Button variant='outlined' onClick={addProductHandler} disabled={!(productName != '' && productDetail != '' && productImages.length > 0)}>Add Product</Button>
                             : <Button variant='outlined' onClick={updateProductHandler} disabled={!(productName != '' && productDetail != '' && productImages. length > 0)}>Update Product</Button>}
                         <br/><br/>
-                        <DataGrid
-                            rows={products}
-                            columns={productColumns}
-                            initialState={{
-                                pagination: {
-                                    paginationModel: { page: 0, pageSize: 5 },
-                                },
-                            }}
-                            pageSizeOptions={[5, 10]}
-                            sx={{ }}
-                            onCellClick={(e)=> productSelectHandler(e.row)}
-                            getRowHeight={() => 'auto'}
-                        />
+                        <Box>
+                            Products: 
+                            <br/><br/>
+                            <SimpleTreeView onSelectedItemsChange={(e,ids)=>{
+                                productSelectHandler(products.find(product=>ids.includes(product._id)))
+                            }}>
+                                {
+                                    products.filter(product=>!product.parent).map(product=>{
+                                    return (
+                                        <TreeItem itemId={product._id} label={<Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <span>{product.name}</span>
+                                        <Box sx={{ marginLeft: 'auto' }}>
+                                          <IconButton size="small" onClick={() => editProductHandler(products.findIndex(info=>info._id === product._id))}>
+                                            <EditIcon fontSize="small" />
+                                          </IconButton>
+                                          <IconButton size="small" onClick={() => deleteProductHandler(products.findIndex(info=>info._id === product._id))}>
+                                            <DeleteIcon fontSize="small" />
+                                          </IconButton>
+                                        </Box>
+                                      </Box>}>
+                                            {
+                                               renderChildren(product)
+                                            }
+                                        </TreeItem>
+                                    )})
+                                }
+                            </SimpleTreeView>
+                        </Box>
                     </Box>
                     
                     {selectedProduct && <Box>
@@ -1344,6 +1482,11 @@ const Page = () => {
                             
                         </Box>
                     </Box>}
+
+                            </>
+                        )
+                    }
+                    
                 </>
             }
             {selectedProduct && <PrintModal open={openPrintModal} setOpen={setOpenPrintModal} totalAmount={totalAmount} product={selectedProduct} setProduct={setSelectedProduct}/>}
