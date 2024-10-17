@@ -24,13 +24,12 @@ export default function Admin() {
     
 
     const companyColumns =  [
-        { field: 'id', headerName: '#', width: 50 },
         { field: 'name', headerName: 'Company Name', width: 150,
             renderCell: (data) => {
                 return (<span style={{whiteSpace: "pre-line", padding: 10}}>{data.value}</span>);
             } 
         },
-        { field: 'isVerified', headerName: 'Status', width: 150,
+        { field: 'isVerified', headerName: 'Status', width: 100,
             renderCell: (data) => {
                 return (<span style={{whiteSpace: "pre-line", padding: 10}}>{data.value?'Approved':'Waiting'}</span>);
             }

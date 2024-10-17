@@ -165,7 +165,7 @@ export const uploadFiles = async (body) => {
 export const getAllCompanies = async() => {
     try {
         const res = await axios.get(`${Backend_URL}/company`)
-        return res.data.data.data
+        return res.data.data.data.sort((a,b)=>a.isVerified - b.isVerified)
     }
     catch(err) {
         return []
