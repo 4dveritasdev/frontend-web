@@ -91,6 +91,7 @@ const Page = () => {
     const mcWebcamRef = useRef(null);
     const productPhotoRef = useRef([]);
     const [parentProduct,setParentProduct] = useState(null)
+    const [parentProductCount,setParentProductCount] = useState(0)
 
     const [captureStart,setCaptureStart] = useState([false,false,false])
     productPhotoRef.current = productImageInputs.map((_, i) => productPhotoRef.current[i] ?? React.createRef());
@@ -207,6 +208,7 @@ const Page = () => {
             private: ''
         });
         setParentProduct(null)
+        setParentProductCount(0)
         setIsEditing(0);
         setUpdates(0);
     }
@@ -251,7 +253,8 @@ const Page = () => {
                 videos: mcVideos,
                 ...manualsAndCerts
             },
-            parent:parentProduct
+            parent:parentProduct,
+            parentCount:parentProductCount
         });
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
@@ -299,7 +302,8 @@ const Page = () => {
                 videos: mcVideos,
                 ...manualsAndCerts
             },
-            parent:parentProduct
+            parent:parentProduct,
+            parentCount:parentProductCount
         });
         const res = await getCompanyProducts({ company_id: company._id });
         const ptmp = res.map((p, i) => ({
@@ -401,6 +405,7 @@ const Page = () => {
             private: products[id].manualsAndCerts.private
         });
         setParentProduct(products[id].parent)
+        setParentProductCount(products[id].parentCount)
     }
     
     const deleteProductHandler = async (id) => {
@@ -1129,6 +1134,11 @@ const Page = () => {
                                                     ))
                                                 }
                                             </Select>
+                                            <br/>
+                                            <br/>
+                                            Parent Product Count
+                                            <br/>
+                                            <TextField  id="outlined-basic" label="Product Count" variant="outlined" type="number" size='small' value={parentProductCount} onChange={(e) => setParentProductCount(e.target.value)} />
                                             <br/> <br/>
                                             
                                         </TabPanel>
